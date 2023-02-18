@@ -276,7 +276,7 @@ gl::Mesh* gl::renderer::renderObject<Chunk>(Chunk chunk)
         if((!index) || (index==255))
           continue;
 
-        for(UInt32 i = 0; i < 12; i++)
+        for(UInt32 i = 0; i < 16; i++)
         {
           if(trianglesTable[index][i] < 0 || trianglesTable[index][i] > 11)
             break;
