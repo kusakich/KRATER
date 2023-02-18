@@ -47,9 +47,7 @@ int main()
   Chunk chunk;
   gl::Mesh* chunkMesh = gl::renderer::renderObject<Chunk>(chunk);
 
-  Quad selectCube;
-  selectCube.size = glm::vec3(1.01);
-  gl::Texture* selectTexture = new gl::Texture("BASE/SPRITES/select.png");
+  gl::Texture* selectTexture = new gl::Texture("BASE/GUI/select.png");
 
   Camera mainCamera(glm::vec3(8.0,8.0,30.0), glm::vec3(0.0,0.0,0.0));
   mainCamera.setProjectionMatrix(glm::perspective(70.0,(Float64)windowWidth/(Float64)windowHeight,0.1,100.0));
@@ -118,15 +116,12 @@ int main()
     glm::vec3   select = mainCamera.raycast(0.2);
     glm::ivec3 iselect = glm::vec3((SInt32)round(select.x),(SInt32)round(select.y),(SInt32)round(select.z));
 
-    selectCube.position = select;
-    selectTexture->bind();
-    gl::renderer::drawQuad(selectCube, mainCamera);
-
-    if(core::mouse::isJustClicked(core::mouse::Buttons::LEFT))
+    if(core::mouse::isClicked(core::mouse::Buttons::LEFT))
     {
       if( iselect.x >= 0 && iselect.x < Chunk::WIDTH &&
           iselect.y >= 0 && iselect.y < Chunk::WIDTH &&
-          iselect.z >= 0 && iselect.z < Chunk::WIDTH)
+          iselect.z >= 0 && iselect.z < Chunk::WIDTH &&
+          chunk.data3[iselect.z][iselect.y][iselect.x] != 0)
       {
         chunk.data3[iselect.z][iselect.y][iselect.x] = 0;
         delete chunkMesh;
@@ -134,7 +129,7 @@ int main()
       }
     }
 
-    if(core::mouse::isJustClicked(core::mouse::Buttons::RIGHT))
+    if(core::mouse::isClicked(core::mouse::Buttons::RIGHT))
     {
       select = mainCamera.raycast(-0.4);
       iselect = glm::vec3((SInt32)round(select.x),
@@ -143,13 +138,17 @@ int main()
 
       if( iselect.x >= 0 && iselect.x < Chunk::WIDTH &&
           iselect.y >= 0 && iselect.y < Chunk::WIDTH &&
-          iselect.z >= 0 && iselect.z < Chunk::WIDTH)
+          iselect.z >= 0 && iselect.z < Chunk::WIDTH &&
+          chunk.data3[iselect.z][iselect.y][iselect.x] == 0)
       {
         chunk.data3[iselect.z][iselect.y][iselect.x] = 1;
         delete chunkMesh;
         chunkMesh = gl::renderer::renderObject<Chunk>(chunk);
       }
     }
+
+    selectTexture->bind();
+    gl::renderer::drawRect(Rect(windowWidth/2-8, windowHeight/2-8, 16, 16));
 
     if(isShowF3)
     {
