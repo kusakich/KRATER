@@ -16,7 +16,7 @@ int main()
   bool running = true;
   bool isShowF3 = true;
 
-  mINI::INIFile settingsFile("DATA/settings.ini");
+  mINI::INIFile settingsFile("BASE/settings.ini");
   mINI::INIStructure settings;
   settingsFile.read(settings);
 
@@ -34,8 +34,8 @@ int main()
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
   gl::Shader* chunkShaders[2];
-  chunkShaders[0] = new gl::Shader("DATA/SHADERS/chunk.vert", gl::Shader::Type::VERTEX);
-  chunkShaders[1] = new gl::Shader("DATA/SHADERS/chunk.frag", gl::Shader::Type::FRAGMENT);
+  chunkShaders[0] = new gl::Shader("BASE/SHADERS/chunk.vert", gl::Shader::Type::VERTEX);
+  chunkShaders[1] = new gl::Shader("BASE/SHADERS/chunk.frag", gl::Shader::Type::FRAGMENT);
   gl::ShaderProgram* chunkShaderProgram = new gl::ShaderProgram(2, chunkShaders);
   chunkShaderProgram->addUniform("m");
   chunkShaderProgram->addUniform("v");
@@ -47,8 +47,7 @@ int main()
 
   Quad selectCube;
   selectCube.size = glm::vec3(1.01);
-  gl::Texture* selectTexture = new gl::Texture("DATA/SPRITES/select.png");
-  gl::Texture* buttonTexture = new gl::Texture("DATA/GUI/button.png");
+  gl::Texture* selectTexture = new gl::Texture("BASE/SPRITES/select.png");
 
   Camera mainCamera(glm::vec3(8.0,8.0,30.0), glm::vec3(0.0,0.0,0.0));
   mainCamera.setProjectionMatrix(glm::perspective(70.0,(Float64)windowWidth/(Float64)windowHeight,0.1,100.0));

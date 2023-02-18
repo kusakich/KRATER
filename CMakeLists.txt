@@ -22,10 +22,7 @@ ADD_EXECUTABLE (${PROJECT_NAME}
                 SOURCE/chunk.cpp
                 SOURCE/renderer.cpp
                 SOURCE/texture.cpp
-                SOURCE/primitives.cpp
-                SOURCE/vbo.cpp
-                SOURCE/vao.cpp
-                SOURCE/ebo.cpp)
+                SOURCE/primitives.cpp)
 
 #BINARY DIRECTORY
 SET_TARGET_PROPERTIES (${PROJECT_NAME}

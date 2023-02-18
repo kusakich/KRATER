@@ -101,26 +101,29 @@ namespace gl
 
 void gl::renderer::initialize()
 {
+  ///////////RECT///////////
   basicRectMesh = new Mesh(basicRectVertex, 6, (UInt32[]){2,2,0}, GL_TRIANGLES);
   Shader* basicRectShaders[2];
-  basicRectShaders[0] = new Shader("DATA/SHADERS/rect.vert", gl::Shader::Type::VERTEX);
-  basicRectShaders[1] = new Shader("DATA/SHADERS/rect.frag", gl::Shader::Type::FRAGMENT);
+  basicRectShaders[0] = new Shader("BASE/SHADERS/rect.vert", gl::Shader::Type::VERTEX);
+  basicRectShaders[1] = new Shader("BASE/SHADERS/rect.frag", gl::Shader::Type::FRAGMENT);
   basicRectShaderProgram = new ShaderProgram(2, basicRectShaders);
   basicRectShaderProgram->addUniform("m");
   basicRectShaderProgram->addUniform("v");
 
+  ///////////QUAD///////////
   basicQuadMesh = new Mesh(basicQuadVertex, 36, (UInt32[]){3,3,2,0}, GL_TRIANGLES);
   Shader* basicQuadShaders[2];
-  basicQuadShaders[0] = new Shader("DATA/SHADERS/quad.vert", gl::Shader::Type::VERTEX);
-  basicQuadShaders[1] = new Shader("DATA/SHADERS/quad.frag", gl::Shader::Type::FRAGMENT);
+  basicQuadShaders[0] = new Shader("BASE/SHADERS/quad.vert", gl::Shader::Type::VERTEX);
+  basicQuadShaders[1] = new Shader("BASE/SHADERS/quad.frag", gl::Shader::Type::FRAGMENT);
   basicQuadShaderProgram = new ShaderProgram(2, basicQuadShaders);
   basicQuadShaderProgram->addUniform("m");
   basicQuadShaderProgram->addUniform("v");
   basicQuadShaderProgram->addUniform("p");
 
+  ///////////TEXT///////////
   Shader* basicTextShaders[2];
-  basicTextShaders[0] = new Shader("DATA/SHADERS/text.vert", gl::Shader::Type::VERTEX);
-  basicTextShaders[1] = new Shader("DATA/SHADERS/text.frag", gl::Shader::Type::FRAGMENT);
+  basicTextShaders[0] = new Shader("BASE/SHADERS/text.vert", gl::Shader::Type::VERTEX);
+  basicTextShaders[1] = new Shader("BASE/SHADERS/text.frag", gl::Shader::Type::FRAGMENT);
   basicTextShaderProgram = new ShaderProgram(2, basicTextShaders);
   basicTextShaderProgram->addUniform("m");
   basicTextShaderProgram->addUniform("v");
@@ -131,7 +134,7 @@ void gl::renderer::initialize()
     spdlog::critical("ERROR::FREETYPE: Could not init FreeType Library");
     return; }
   FT_Face face;
-  if (FT_New_Face(ft, "DATA/arial.ttf", 0, &face)) {
+  if (FT_New_Face(ft, "BASE/GUI/arial.ttf", 0, &face)) {
     spdlog::critical("ERROR::FREETYPE: Failed to load font");
     return; }
 
@@ -174,6 +177,10 @@ void gl::renderer::initialize()
 
   FT_Done_Face(face);
   FT_Done_FreeType(ft);
+
+  ///////////CHUNK///////////
+
+
 }
 
 void gl::renderer::finalize()
@@ -246,12 +253,11 @@ void gl::renderer::drawText(std::string text, Float32 x, Float32 y, Float32 scal
   }
 }
 
-const   UInt32  vertexSize = 6;
-static  Float32 vertexBuffer[300000] = {0};
-
 template<>
 gl::Mesh* gl::renderer::renderObject<Chunk>(Chunk chunk)
 {
+  const   UInt32  vertexSize = 6;
+  static  Float32 vertexBuffer[300000] = {0};
   std::fill(vertexBuffer, &vertexBuffer[299999], 0);
   UInt32  vertexCount = 0;
   for(UInt32 z = 0; z < chunk.WIDTH-1; z++) {
