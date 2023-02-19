@@ -166,7 +166,8 @@ void gl::renderer::initialize()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    Character character = {
+    Character character =
+    {
       texture,
       glm::ivec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
       glm::ivec2(face->glyph->bitmap_left,  face->glyph->bitmap_top),
@@ -177,10 +178,6 @@ void gl::renderer::initialize()
 
   FT_Done_Face(face);
   FT_Done_FreeType(ft);
-
-  ///////////CHUNK///////////
-
-
 }
 
 void gl::renderer::finalize()
@@ -256,22 +253,22 @@ void gl::renderer::drawText(std::string text, Float32 x, Float32 y, Float32 scal
 template<>
 gl::Mesh* gl::renderer::renderObject<Chunk>(Chunk chunk)
 {
-  const   UInt32  vertexSize = 6;
+  const   UInt32  vertexSize = 7;
   static  Float32 vertexBuffer[300000] = {0};
   std::fill(vertexBuffer, &vertexBuffer[299999], 0);
   UInt32  vertexCount = 0;
-  for(UInt32 z = 0; z < chunk.WIDTH-1; z++) {
-    for(UInt32 y = 0; y < chunk.WIDTH-1; y++) {
-      for(UInt32 x = 0; x < chunk.WIDTH-1; x++) {
+  for(UInt32 z = 0; z < Chunk::WIDTH-1; z++) {
+    for(UInt32 y = 0; y < Chunk::WIDTH-1; y++) {
+      for(UInt32 x = 0; x < Chunk::WIDTH-1; x++) {
         UInt8 index = 0;
-        index = index | ((1 << 0) & ((!!chunk.data3[ z ][y+1][ x ]) << 0));
-        index = index | ((1 << 1) & ((!!chunk.data3[ z ][y+1][x+1]) << 1));
-        index = index | ((1 << 2) & ((!!chunk.data3[ z ][ y ][x+1]) << 2));
-        index = index | ((1 << 3) & ((!!chunk.data3[ z ][ y ][ x ]) << 3));
-        index = index | ((1 << 4) & ((!!chunk.data3[z+1][y+1][ x ]) << 4));
-        index = index | ((1 << 5) & ((!!chunk.data3[z+1][y+1][x+1]) << 5));
-        index = index | ((1 << 6) & ((!!chunk.data3[z+1][ y ][x+1]) << 6));
-        index = index | ((1 << 7) & ((!!chunk.data3[z+1][ y ][ x ]) << 7));
+        index = index | ((1 << 0) & ((!!chunk.data3[ z ][y+1][ x ].type) << 0));
+        index = index | ((1 << 1) & ((!!chunk.data3[ z ][y+1][x+1].type) << 1));
+        index = index | ((1 << 2) & ((!!chunk.data3[ z ][ y ][x+1].type) << 2));
+        index = index | ((1 << 3) & ((!!chunk.data3[ z ][ y ][ x ].type) << 3));
+        index = index | ((1 << 4) & ((!!chunk.data3[z+1][y+1][ x ].type) << 4));
+        index = index | ((1 << 5) & ((!!chunk.data3[z+1][y+1][x+1].type) << 5));
+        index = index | ((1 << 6) & ((!!chunk.data3[z+1][ y ][x+1].type) << 6));
+        index = index | ((1 << 7) & ((!!chunk.data3[z+1][ y ][ x ].type) << 7));
 
         if((!index) || (index==255))
           continue;
@@ -284,6 +281,18 @@ gl::Mesh* gl::renderer::renderObject<Chunk>(Chunk chunk)
           vertexBuffer[vertexCount*vertexSize+0] = (Float32)x + pointsTable[trianglesTable[index][i]][0];
           vertexBuffer[vertexCount*vertexSize+1] = (Float32)y + pointsTable[trianglesTable[index][i]][1];
           vertexBuffer[vertexCount*vertexSize+2] = (Float32)z + pointsTable[trianglesTable[index][i]][2];
+          Float32 light = (Float32)
+                          ((chunk.data3[ z ][y+1][ x ].light+
+                            chunk.data3[ z ][y+1][x+1].light+
+                            chunk.data3[ z ][ y ][x+1].light+
+                            chunk.data3[ z ][ y ][ x ].light+
+                            chunk.data3[z+1][y+1][ x ].light+
+                            chunk.data3[z+1][y+1][x+1].light+
+                            chunk.data3[z+1][ y ][x+1].light+
+                            chunk.data3[z+1][ y ][ x ].light)/8)/
+                            (Float32)Block::MAX_LIGHT;
+
+          vertexBuffer[vertexCount*vertexSize+6] = light;
 
           vertexCount++;
 
@@ -320,6 +329,6 @@ gl::Mesh* gl::renderer::renderObject<Chunk>(Chunk chunk)
     }
   }
 
-  gl::Mesh* mesh = new gl::Mesh(vertexBuffer, vertexCount, (UInt32[]){3,3,0}, GL_TRIANGLES);
+  gl::Mesh* mesh = new gl::Mesh(vertexBuffer, vertexCount, (UInt32[]){3,3,1,0}, GL_TRIANGLES);
   return mesh;
 }

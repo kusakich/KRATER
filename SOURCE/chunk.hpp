@@ -4,6 +4,14 @@
 #include <util.hpp>
 #include <mesh.hpp>
 
+struct Block
+{
+  static const UInt32 MAX_LIGHT = 15;
+
+  UInt8 type;
+  UInt8 light;
+};
+
 struct Chunk
 {
   static const UInt32 WIDTH = 16;
@@ -11,11 +19,12 @@ struct Chunk
 
   union
   {
-    UInt32 data[VOLUME];
-    UInt32 data3[WIDTH][WIDTH][WIDTH];
+    Block data[VOLUME];
+    Block data3[WIDTH][WIDTH][WIDTH];
   };
 
   Chunk();
+  void computeLight();
 };
 
 #endif

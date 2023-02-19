@@ -6,7 +6,6 @@ gl::Mesh::Mesh()
 {
   vbo = 0;
   vao = 0;
-  ebo = 0;
 }
 
 gl::Mesh::Mesh
@@ -17,7 +16,6 @@ gl::Mesh::Mesh
 {
   vbo = 0;
   vao = 0;
-  ebo = 0;
 
   SInt32 vertexSize = 0;
   for(SInt32 i = 0; attributes[i]; i++)
@@ -50,7 +48,6 @@ gl::Mesh::~Mesh()
 {
   if(vao != 0) glDeleteVertexArrays(1, &vao);
   if(vbo != 0) glDeleteBuffers(1, &vbo);
-  if(ebo != 0) glDeleteBuffers(1, &ebo);
 }
 
 void gl::Mesh::draw()

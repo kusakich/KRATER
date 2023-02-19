@@ -20,6 +20,7 @@ int main()
   mINI::INIStructure settings;
   settingsFile.read(settings);
 
+  Float64 deltaTime   = 1;
   UInt32 windowWidth  = std::stoi(settings["Window"]["width"]);
   UInt32 windowHeight = std::stoi(settings["Window"]["height"]);
   const std::string windowTitle = settings["Window"]["title"];
@@ -45,6 +46,7 @@ int main()
   chunkShaderProgram->addUniform("l");
 
   Chunk chunk;
+  chunk.computeLight();
   gl::Mesh* chunkMesh = gl::renderer::renderObject<Chunk>(chunk);
 
   gl::Texture* selectTexture = new gl::Texture("BASE/GUI/select.png");
@@ -68,7 +70,7 @@ int main()
 
     core::events::pollEvents();
 
-    Float64 deltaTime = core::window::getDeltaTime();
+    deltaTime    = core::window::getDeltaTime();
     windowWidth  = core::window::getWidth();
     windowHeight = core::window::getHeight();
 
@@ -137,6 +139,7 @@ int main()
           chunk.data3[iselect.z][iselect.y][iselect.x].type != 0)
       {
         chunk.data3[iselect.z][iselect.y][iselect.x].type = 0;
+        chunk.computeLight();
         delete chunkMesh;
         chunkMesh = gl::renderer::renderObject<Chunk>(chunk);
       }
@@ -155,6 +158,7 @@ int main()
           chunk.data3[iselect.z][iselect.y][iselect.x].type == 0)
       {
         chunk.data3[iselect.z][iselect.y][iselect.x].type = 1;
+        chunk.computeLight();
         delete chunkMesh;
         chunkMesh = gl::renderer::renderObject<Chunk>(chunk);
       }
