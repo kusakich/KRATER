@@ -1,4 +1,5 @@
 #include <util.hpp>
+#include <core.hpp>
 #include <camera.hpp>
 
 #include <glad/glad.h>
@@ -68,10 +69,14 @@ void Camera::setProjectionMatrix(glm::mat4 matrix)
 
 glm::vec3 Camera::raycast(Float32 delta)
 {
+  UInt32 width = core::window::getWidth();
+  UInt32 height = core::window::getHeight();
   Float32 z;
   glm::vec3 result = glm::vec3(1.0);
-  glReadPixels(640, 360, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &z);
-  result = glm::unProject(glm::vec3(640,360,z), view_, projection_, glm::vec4(0,0,1280,720));
+  glReadPixels(width/2, height/2, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &z);
+  result = glm::unProject(glm::vec3(width/2,height/2,z),
+                          view_, projection_,
+                          glm::vec4(0,0,width,height));
 
   if(delta != 0.0)
   {

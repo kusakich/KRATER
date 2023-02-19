@@ -20,9 +20,9 @@ int main()
   mINI::INIStructure settings;
   settingsFile.read(settings);
 
-  const UInt32 windowWidth      = std::stoi(settings["Window"]["width"]);
-  const UInt32 windowHeight     = std::stoi(settings["Window"]["height"]);
-  const std::string windowTitle =           settings["Window"]["title"];
+  UInt32 windowWidth  = std::stoi(settings["Window"]["width"]);
+  UInt32 windowHeight = std::stoi(settings["Window"]["height"]);
+  const std::string windowTitle = settings["Window"]["title"];
 
   core::window::create(windowTitle.c_str(), windowWidth, windowHeight);
   core::events::initialize();
@@ -50,7 +50,10 @@ int main()
   gl::Texture* selectTexture = new gl::Texture("BASE/GUI/select.png");
 
   Camera mainCamera(glm::vec3(8.0,8.0,30.0), glm::vec3(0.0,0.0,0.0));
-  mainCamera.setProjectionMatrix(glm::perspective(70.0,(Float64)windowWidth/(Float64)windowHeight,0.1,100.0));
+  mainCamera.setProjectionMatrix(glm::perspective(70.0,
+                                                  (Float64)core::window::getWidth()/
+                                                  (Float64)core::window::getHeight(),
+                                                  0.1,100.0));
 
   while(running)
   {
@@ -66,6 +69,14 @@ int main()
     core::events::pollEvents();
 
     Float64 deltaTime = core::window::getDeltaTime();
+    windowWidth  = core::window::getWidth();
+    windowHeight = core::window::getHeight();
+
+    mainCamera.setProjectionMatrix( glm::perspective(
+                                      70.0,
+                                      (Float64)windowWidth/
+                                      (Float64)windowHeight,
+                                      0.1,100.0));
 
     if(core::keyboard::isPressed(core::keyboard::Keys::W))
       mainCamera.translate(glm::vec3( 10.0*deltaTime*glm::sin(mainCamera.rotation.z),
@@ -114,16 +125,18 @@ int main()
     chunkMesh->draw();
 
     glm::vec3   select = mainCamera.raycast(0.2);
-    glm::ivec3 iselect = glm::vec3((SInt32)round(select.x),(SInt32)round(select.y),(SInt32)round(select.z));
+    glm::ivec3 iselect = glm::vec3((SInt32)round(select.x),
+                                   (SInt32)round(select.y),
+                                   (SInt32)round(select.z));
 
     if(core::mouse::isClicked(core::mouse::Buttons::LEFT))
     {
       if( iselect.x >= 0 && iselect.x < Chunk::WIDTH &&
           iselect.y >= 0 && iselect.y < Chunk::WIDTH &&
           iselect.z >= 0 && iselect.z < Chunk::WIDTH &&
-          chunk.data3[iselect.z][iselect.y][iselect.x] != 0)
+          chunk.data3[iselect.z][iselect.y][iselect.x].type != 0)
       {
-        chunk.data3[iselect.z][iselect.y][iselect.x] = 0;
+        chunk.data3[iselect.z][iselect.y][iselect.x].type = 0;
         delete chunkMesh;
         chunkMesh = gl::renderer::renderObject<Chunk>(chunk);
       }
@@ -139,16 +152,18 @@ int main()
       if( iselect.x >= 0 && iselect.x < Chunk::WIDTH &&
           iselect.y >= 0 && iselect.y < Chunk::WIDTH &&
           iselect.z >= 0 && iselect.z < Chunk::WIDTH &&
-          chunk.data3[iselect.z][iselect.y][iselect.x] == 0)
+          chunk.data3[iselect.z][iselect.y][iselect.x].type == 0)
       {
-        chunk.data3[iselect.z][iselect.y][iselect.x] = 1;
+        chunk.data3[iselect.z][iselect.y][iselect.x].type = 1;
         delete chunkMesh;
         chunkMesh = gl::renderer::renderObject<Chunk>(chunk);
       }
     }
 
     selectTexture->bind();
-    gl::renderer::drawRect(Rect(windowWidth/2-8, windowHeight/2-8, 16, 16));
+    gl::renderer::drawRect(Rect(windowWidth/2-8,
+                                windowHeight/2-8,
+                                16, 16));
 
     if(isShowF3)
     {

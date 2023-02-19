@@ -23,7 +23,7 @@ namespace core
       width  = pwidth;
       height = pheight;
 
-      glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+      glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
       glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_TRUE);
       glfwWindowHint(GLFW_DEPTH_BITS, 24);
       glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_API);
@@ -98,7 +98,14 @@ namespace core
     static bool     cursorLocked  = true;
     static bool     cursorStarted = false;
 
-    static void keyCallBack(GLFWwindow* window, SInt32 key, SInt32 scancode, SInt32 action, SInt32 mode)
+    void windowSizeCallback(GLFWwindow* window, SInt32 width, SInt32 height)
+    {
+      window::width = width;
+      window::height = height;
+      glViewport(0,0, width, height);
+    }
+
+    static void keyCallback(GLFWwindow* window, SInt32 key, SInt32 scancode, SInt32 action, SInt32 mode)
     {
       if (action == GLFW_PRESS)
       {
@@ -112,7 +119,7 @@ namespace core
       }
     }
 
-    static void cursorPositionCallBack(GLFWwindow* window, Float64 x, Float64 y)
+    static void cursorPositionCallback(GLFWwindow* window, Float64 x, Float64 y)
     {
       cursorDeltaX = x - cursorX;
       cursorDeltaY = y - cursorY;
@@ -121,7 +128,7 @@ namespace core
       cursorY = y;
     }
 
-    static void mouseButtonCallBack(GLFWwindow* window, SInt32 button, SInt32 action, SInt32 mode)
+    static void mouseButtonCallback(GLFWwindow* window, SInt32 button, SInt32 action, SInt32 mode)
     {
       if (action == GLFW_PRESS)
       {
@@ -137,9 +144,10 @@ namespace core
 
     void initialize()
     {
-      glfwSetKeyCallback(window::window, keyCallBack);
-      glfwSetCursorPosCallback(window::window, cursorPositionCallBack);
-      glfwSetMouseButtonCallback(window::window, mouseButtonCallBack);
+      glfwSetWindowSizeCallback(window::window, windowSizeCallback);
+      glfwSetKeyCallback(window::window, keyCallback);
+      glfwSetCursorPosCallback(window::window, cursorPositionCallback);
+      glfwSetMouseButtonCallback(window::window, mouseButtonCallback);
       glfwSetInputMode(window::window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
       glfwSetCursorPos(window::window, 0.0,0.0);
     }
