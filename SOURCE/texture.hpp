@@ -12,7 +12,7 @@ namespace gl
   enum Filter
   {
     NEAREST = 0x2600,
-    LINEAR  = 0x2601
+    LINEAR = 0x2601
   };
 
   struct TextureSettings
@@ -23,14 +23,14 @@ namespace gl
 
   class Texture
   {
-  private:
-    UInt32 id;
   public:
     Texture(const char* fileName,
             TextureSettings settings =
             (TextureSettings){.wrap = REPEAT, .filter = NEAREST});
     ~Texture();
     void bind();
+  private:
+    UInt32 id;
   };
 };
 

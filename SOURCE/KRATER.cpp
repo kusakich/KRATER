@@ -7,7 +7,7 @@
 #include <shader.hpp>
 #include <texture.hpp>
 #include <camera.hpp>
-#include <chunk.hpp>
+#include <world.hpp>
 #include <renderer.hpp>
 
 int main()
@@ -45,9 +45,13 @@ int main()
   chunkShaderProgram->addUniform("p");
   chunkShaderProgram->addUniform("l");
 
-  Chunk chunk;
-  chunk.computeLight();
-  gl::Mesh* chunkMesh = gl::renderer::renderObject<Chunk>(chunk);
+  World* world = new World();
+  gl::Mesh* chunkMeshes[World::WIDTH][World::WIDTH];
+  for(UInt32 y = 0; y < World::WIDTH; ++y)
+    for(UInt32 x = 0; x < World::WIDTH; ++x)
+    {
+      chunkMeshes[y][x] = gl::renderer::renderObject<ChunkData>(world->getChunk(x,y)->getData());
+    }
 
   gl::Texture* selectTexture = new gl::Texture("BASE/GUI/select.png");
 
@@ -124,45 +128,50 @@ int main()
     chunkShaderProgram->uniform<glm::mat4>("v", mainCamera.view);
     chunkShaderProgram->uniform<glm::mat4>("p", mainCamera.projection);
     chunkShaderProgram->uniform<glm::vec3>("l", glm::vec3(0.3,0.5,1.0));
-    chunkMesh->draw();
+    for(UInt32 y = 0; y < World::WIDTH; ++y)
+      for(UInt32 x = 0; x < World::WIDTH; ++x)
+      {
+        chunkShaderProgram->uniform<glm::mat4>("m", glm::translate(glm::mat4(1), glm::vec3(x*Chunk::WIDTH,y*Chunk::WIDTH,0.0)));
+        chunkMeshes[y][x]->draw();
+      }
 
     glm::vec3   select = mainCamera.raycast(0.2);
     glm::ivec3 iselect = glm::vec3((SInt32)round(select.x),
                                    (SInt32)round(select.y),
                                    (SInt32)round(select.z));
 
-    if(core::mouse::isClicked(core::mouse::Buttons::LEFT))
-    {
-      if( iselect.x >= 0 && iselect.x < Chunk::WIDTH &&
-          iselect.y >= 0 && iselect.y < Chunk::WIDTH &&
-          iselect.z >= 0 && iselect.z < Chunk::WIDTH &&
-          chunk.data3[iselect.z][iselect.y][iselect.x].type != 0)
-      {
-        chunk.data3[iselect.z][iselect.y][iselect.x].type = 0;
-        chunk.computeLight();
-        delete chunkMesh;
-        chunkMesh = gl::renderer::renderObject<Chunk>(chunk);
-      }
-    }
-
-    if(core::mouse::isClicked(core::mouse::Buttons::RIGHT))
-    {
-      select = mainCamera.raycast(-0.4);
-      iselect = glm::vec3((SInt32)round(select.x),
-                          (SInt32)round(select.y),
-                          (SInt32)round(select.z));
-
-      if( iselect.x >= 0 && iselect.x < Chunk::WIDTH &&
-          iselect.y >= 0 && iselect.y < Chunk::WIDTH &&
-          iselect.z >= 0 && iselect.z < Chunk::WIDTH &&
-          chunk.data3[iselect.z][iselect.y][iselect.x].type == 0)
-      {
-        chunk.data3[iselect.z][iselect.y][iselect.x].type = 1;
-        chunk.computeLight();
-        delete chunkMesh;
-        chunkMesh = gl::renderer::renderObject<Chunk>(chunk);
-      }
-    }
+    //if(core::mouse::isClicked(core::mouse::Buttons::LEFT))
+    //{
+    //  if( iselect.x >= 0 && iselect.x < Chunk::WIDTH &&
+    //      iselect.y >= 0 && iselect.y < Chunk::WIDTH &&
+    //      iselect.z >= 0 && iselect.z < Chunk::WIDTH &&
+    //      chunk.data3[iselect.z][iselect.y][iselect.x].type != 0)
+    //  {
+    //    chunk.data3[iselect.z][iselect.y][iselect.x].type = 0;
+    //    chunk.computeLight();
+    //    delete chunkMesh;
+    //    chunkMesh = gl::renderer::renderObject<Chunk>(chunk);
+    //  }
+    //}
+//
+    //if(core::mouse::isClicked(core::mouse::Buttons::RIGHT))
+    //{
+    //  select = mainCamera.raycast(-0.4);
+    //  iselect = glm::vec3((SInt32)round(select.x),
+    //                      (SInt32)round(select.y),
+    //                      (SInt32)round(select.z));
+//
+    //  if( iselect.x >= 0 && iselect.x < Chunk::WIDTH &&
+    //      iselect.y >= 0 && iselect.y < Chunk::WIDTH &&
+    //      iselect.z >= 0 && iselect.z < Chunk::WIDTH &&
+    //      chunk.data3[iselect.z][iselect.y][iselect.x].type == 0)
+    //  {
+    //    chunk.data3[iselect.z][iselect.y][iselect.x].type = 1;
+    //    chunk.computeLight();
+    //    delete chunkMesh;
+    //    chunkMesh = gl::renderer::renderObject<Chunk>(chunk);
+    //  }
+    //}
 
     selectTexture->bind();
     gl::renderer::drawRect(Rect(windowWidth/2-8,

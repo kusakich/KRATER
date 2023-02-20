@@ -18,8 +18,8 @@ ADD_EXECUTABLE (${PROJECT_NAME}
                 SOURCE/core.cpp
                 SOURCE/mesh.cpp
                 SOURCE/shader.cpp
+                SOURCE/world.cpp
                 SOURCE/camera.cpp
-                SOURCE/chunk.cpp
                 SOURCE/renderer.cpp
                 SOURCE/texture.cpp
                 SOURCE/primitives.cpp)

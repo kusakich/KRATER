@@ -6,10 +6,10 @@
 #include <core.hpp>
 #include <camera.hpp>
 #include <primitives.hpp>
+#include <world.hpp>
 #include <mesh.hpp>
 #include <shader.hpp>
 #include <texture.hpp>
-#include <chunk.hpp>
 #include <marchingCubesTable.hpp>
 
 static const float basicRectVertex[] =
@@ -251,7 +251,7 @@ void gl::renderer::drawText(std::string text, Float32 x, Float32 y, Float32 scal
 }
 
 template<>
-gl::Mesh* gl::renderer::renderObject<Chunk>(Chunk chunk)
+gl::Mesh* gl::renderer::renderObject<ChunkData>(ChunkData data)
 {
   const   UInt32  vertexSize = 7;
   static  Float32 vertexBuffer[300000] = {0};
@@ -261,14 +261,14 @@ gl::Mesh* gl::renderer::renderObject<Chunk>(Chunk chunk)
     for(UInt32 y = 0; y < Chunk::WIDTH-1; y++) {
       for(UInt32 x = 0; x < Chunk::WIDTH-1; x++) {
         UInt8 index = 0;
-        index = index | ((1 << 0) & ((!!chunk.data3[ z ][y+1][ x ].type) << 0));
-        index = index | ((1 << 1) & ((!!chunk.data3[ z ][y+1][x+1].type) << 1));
-        index = index | ((1 << 2) & ((!!chunk.data3[ z ][ y ][x+1].type) << 2));
-        index = index | ((1 << 3) & ((!!chunk.data3[ z ][ y ][ x ].type) << 3));
-        index = index | ((1 << 4) & ((!!chunk.data3[z+1][y+1][ x ].type) << 4));
-        index = index | ((1 << 5) & ((!!chunk.data3[z+1][y+1][x+1].type) << 5));
-        index = index | ((1 << 6) & ((!!chunk.data3[z+1][ y ][x+1].type) << 6));
-        index = index | ((1 << 7) & ((!!chunk.data3[z+1][ y ][ x ].type) << 7));
+        index = index | ((1 << 0) & ((!!data.blocks[ z ][y+1][ x ].type) << 0));
+        index = index | ((1 << 1) & ((!!data.blocks[ z ][y+1][x+1].type) << 1));
+        index = index | ((1 << 2) & ((!!data.blocks[ z ][ y ][x+1].type) << 2));
+        index = index | ((1 << 3) & ((!!data.blocks[ z ][ y ][ x ].type) << 3));
+        index = index | ((1 << 4) & ((!!data.blocks[z+1][y+1][ x ].type) << 4));
+        index = index | ((1 << 5) & ((!!data.blocks[z+1][y+1][x+1].type) << 5));
+        index = index | ((1 << 6) & ((!!data.blocks[z+1][ y ][x+1].type) << 6));
+        index = index | ((1 << 7) & ((!!data.blocks[z+1][ y ][ x ].type) << 7));
 
         if((!index) || (index==255))
           continue;
@@ -287,63 +287,63 @@ gl::Mesh* gl::renderer::renderObject<Chunk>(Chunk chunk)
           {
             case 0:
               light = (Float32)
-              (chunk.data3[ z ][y+1][ x ].light+
-               chunk.data3[ z ][y+1][x+1].light)/2.0/(Float32)Block::MAX_LIGHT;
+              (data.blocks[ z ][y+1][ x ].light+
+               data.blocks[ z ][y+1][x+1].light)/2.0/(Float32)Block::MAX_LIGHT;
               break;
             case 1:
               light = (Float32)
-              (chunk.data3[ z ][ y ][x+1].light+
-               chunk.data3[ z ][y+1][x+1].light)/2.0/(Float32)Block::MAX_LIGHT;
+              (data.blocks[ z ][ y ][x+1].light+
+               data.blocks[ z ][y+1][x+1].light)/2.0/(Float32)Block::MAX_LIGHT;
               break;
             case 2:
               light = (Float32)
-              (chunk.data3[ z ][ y ][ x ].light+
-               chunk.data3[ z ][ y ][x+1].light)/2.0/(Float32)Block::MAX_LIGHT;
+              (data.blocks[ z ][ y ][ x ].light+
+               data.blocks[ z ][ y ][x+1].light)/2.0/(Float32)Block::MAX_LIGHT;
               break;
             case 3:
               light = (Float32)
-              (chunk.data3[ z ][ y ][ x ].light+
-               chunk.data3[ z ][y+1][ x ].light)/2.0/(Float32)Block::MAX_LIGHT;
+              (data.blocks[ z ][ y ][ x ].light+
+               data.blocks[ z ][y+1][ x ].light)/2.0/(Float32)Block::MAX_LIGHT;
               break;
             case 4:
               light = (Float32)
-              (chunk.data3[z+1][y+1][ x ].light+
-               chunk.data3[z+1][y+1][x+1].light)/2.0/(Float32)Block::MAX_LIGHT;
+              (data.blocks[z+1][y+1][ x ].light+
+               data.blocks[z+1][y+1][x+1].light)/2.0/(Float32)Block::MAX_LIGHT;
               break;
             case 5:
               light = (Float32)
-              (chunk.data3[z+1][ y ][x+1].light+
-               chunk.data3[z+1][y+1][x+1].light)/2.0/(Float32)Block::MAX_LIGHT;
+              (data.blocks[z+1][ y ][x+1].light+
+               data.blocks[z+1][y+1][x+1].light)/2.0/(Float32)Block::MAX_LIGHT;
               break;
             case 6:
               light = (Float32)
-              (chunk.data3[z+1][ y ][ x ].light+
-               chunk.data3[z+1][ y ][x+1].light)/2.0/(Float32)Block::MAX_LIGHT;
+              (data.blocks[z+1][ y ][ x ].light+
+               data.blocks[z+1][ y ][x+1].light)/2.0/(Float32)Block::MAX_LIGHT;
               break;
             case 7:
               light = (Float32)
-              (chunk.data3[z+1][ y ][ x ].light+
-               chunk.data3[z+1][y+1][ x ].light)/2.0/(Float32)Block::MAX_LIGHT;
+              (data.blocks[z+1][ y ][ x ].light+
+               data.blocks[z+1][y+1][ x ].light)/2.0/(Float32)Block::MAX_LIGHT;
               break;
             case 8:
               light = (Float32)
-              (chunk.data3[ z ][y+1][ x ].light+
-               chunk.data3[z+1][y+1][ x ].light)/2.0/(Float32)Block::MAX_LIGHT;
+              (data.blocks[ z ][y+1][ x ].light+
+               data.blocks[z+1][y+1][ x ].light)/2.0/(Float32)Block::MAX_LIGHT;
               break;
             case 9:
               light = (Float32)
-              (chunk.data3[ z ][y+1][x+1].light+
-               chunk.data3[z+1][y+1][x+1].light)/2.0/(Float32)Block::MAX_LIGHT;
+              (data.blocks[ z ][y+1][x+1].light+
+               data.blocks[z+1][y+1][x+1].light)/2.0/(Float32)Block::MAX_LIGHT;
               break;
             case 10:
               light = (Float32)
-              (chunk.data3[ z ][ y ][x+1].light+
-               chunk.data3[z+1][ y ][x+1].light)/2.0/(Float32)Block::MAX_LIGHT;
+              (data.blocks[ z ][ y ][x+1].light+
+               data.blocks[z+1][ y ][x+1].light)/2.0/(Float32)Block::MAX_LIGHT;
               break;
             case 11:
               light = (Float32)
-              (chunk.data3[ z ][ y ][ x ].light+
-               chunk.data3[z+1][ y ][ x ].light)/2.0/(Float32)Block::MAX_LIGHT;
+              (data.blocks[ z ][ y ][ x ].light+
+               data.blocks[z+1][ y ][ x ].light)/2.0/(Float32)Block::MAX_LIGHT;
               break;
           };
 
