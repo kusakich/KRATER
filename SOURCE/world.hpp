@@ -26,6 +26,7 @@ public:
   static const UInt32 VOLUME = WIDTH*WIDTH*WIDTH;
   Chunk(UInt32 globalX = 0, UInt32 globalY = 0);
   ~Chunk();
+  void setBlockType(UInt32 x, UInt32 y, UInt32 z, UInt32 type);
   ChunkData getData();
   void computeLight();
 private:
@@ -35,12 +36,13 @@ private:
 class World
 {
 public:
-  static const UInt32 WIDTH = 4;
+  static const UInt32 WIDTH = 8;
 
   World();
   ~World();
 
-  Chunk * getChunk(UInt32 x, UInt32 y);
+  void setBlockType(UInt32 x, UInt32 y, UInt32 z, UInt32 type);
+  Chunk * getChunk(UInt32 i, UInt32 j);
 private:
   Chunk * chunks[World::WIDTH][World::WIDTH];
 };

@@ -59,7 +59,7 @@ int main()
   mainCamera.setProjectionMatrix(glm::perspective(70.0,
                                                   (Float64)core::window::getWidth()/
                                                   (Float64)core::window::getHeight(),
-                                                  0.1,100.0));
+                                                  0.1,1000.0));
 
   while(running)
   {
@@ -82,7 +82,7 @@ int main()
                                       70.0,
                                       (Float64)windowWidth/
                                       (Float64)windowHeight,
-                                      0.1,100.0));
+                                      0.1,1000.0));
 
     if(core::keyboard::isPressed(core::keyboard::Keys::W))
       mainCamera.translate(glm::vec3( 10.0*deltaTime*glm::sin(mainCamera.rotation.z),
@@ -140,38 +140,36 @@ int main()
                                    (SInt32)round(select.y),
                                    (SInt32)round(select.z));
 
-    //if(core::mouse::isClicked(core::mouse::Buttons::LEFT))
-    //{
-    //  if( iselect.x >= 0 && iselect.x < Chunk::WIDTH &&
-    //      iselect.y >= 0 && iselect.y < Chunk::WIDTH &&
-    //      iselect.z >= 0 && iselect.z < Chunk::WIDTH &&
-    //      chunk.data3[iselect.z][iselect.y][iselect.x].type != 0)
-    //  {
-    //    chunk.data3[iselect.z][iselect.y][iselect.x].type = 0;
-    //    chunk.computeLight();
-    //    delete chunkMesh;
-    //    chunkMesh = gl::renderer::renderObject<Chunk>(chunk);
-    //  }
-    //}
-//
-    //if(core::mouse::isClicked(core::mouse::Buttons::RIGHT))
-    //{
-    //  select = mainCamera.raycast(-0.4);
-    //  iselect = glm::vec3((SInt32)round(select.x),
-    //                      (SInt32)round(select.y),
-    //                      (SInt32)round(select.z));
-//
-    //  if( iselect.x >= 0 && iselect.x < Chunk::WIDTH &&
-    //      iselect.y >= 0 && iselect.y < Chunk::WIDTH &&
-    //      iselect.z >= 0 && iselect.z < Chunk::WIDTH &&
-    //      chunk.data3[iselect.z][iselect.y][iselect.x].type == 0)
-    //  {
-    //    chunk.data3[iselect.z][iselect.y][iselect.x].type = 1;
-    //    chunk.computeLight();
-    //    delete chunkMesh;
-    //    chunkMesh = gl::renderer::renderObject<Chunk>(chunk);
-    //  }
-    //}
+    if(core::mouse::isClicked(core::mouse::Buttons::LEFT))
+    {
+      world->setBlockType(iselect.x,iselect.y,iselect.z, 0);
+      Chunk * currentChunk = world->getChunk(iselect.x/Chunk::WIDTH,iselect.y/Chunk::WIDTH);
+      if(currentChunk != nullptr)
+      {
+        currentChunk->computeLight();
+        delete chunkMeshes[iselect.y/Chunk::WIDTH][iselect.x/Chunk::WIDTH];
+        chunkMeshes[iselect.y/Chunk::WIDTH][iselect.x/Chunk::WIDTH] =
+        gl::renderer::renderObject<ChunkData>(currentChunk->getData());
+      }
+    }
+
+    if(core::mouse::isClicked(core::mouse::Buttons::RIGHT))
+    {
+      select = mainCamera.raycast(-0.4);
+      iselect = glm::vec3((SInt32)round(select.x),
+                          (SInt32)round(select.y),
+                          (SInt32)round(select.z));
+
+      world->setBlockType(iselect.x,iselect.y,iselect.z,1);
+      Chunk * currentChunk = world->getChunk(iselect.x/Chunk::WIDTH,iselect.y/Chunk::WIDTH);
+      if(currentChunk != nullptr)
+      {
+        currentChunk->computeLight();
+        delete chunkMeshes[iselect.y/Chunk::WIDTH][iselect.x/Chunk::WIDTH];
+        chunkMeshes[iselect.y/Chunk::WIDTH][iselect.x/Chunk::WIDTH] =
+        gl::renderer::renderObject<ChunkData>(currentChunk->getData());
+      }
+    }
 
     selectTexture->bind();
     gl::renderer::drawRect(Rect(windowWidth/2-8,
@@ -183,6 +181,23 @@ int main()
       UInt32  fps = (UInt32)(1.0/deltaTime);
       gl::renderer::drawText("FPS: " + std::to_string(fps),3,16,0.33);
       gl::renderer::drawText("KRATER alpha 1",3,32,0.33);
+      gl::renderer::drawText(
+        "pos  "
+        + std::to_string(mainCamera.position.x).erase(std::to_string(mainCamera.position.x).size()-4) + " "
+        + std::to_string(mainCamera.position.y).erase(std::to_string(mainCamera.position.y).size()-4) + " "
+        + std::to_string(mainCamera.position.z).erase(std::to_string(mainCamera.position.z).size()-4),
+        3,48,0.33);
+      gl::renderer::drawText(
+        "rot  "
+        + std::to_string(mainCamera.rotation.x).erase(std::to_string(mainCamera.rotation.x).size()-4) + " "
+        + std::to_string(mainCamera.rotation.y).erase(std::to_string(mainCamera.rotation.y).size()-4) + " "
+        + std::to_string(mainCamera.rotation.z).erase(std::to_string(mainCamera.rotation.z).size()-4),
+        3,64,0.33);
+      gl::renderer::drawText("block "
+        + std::to_string(iselect.x) + " "
+        + std::to_string(iselect.y) + " "
+        + std::to_string(iselect.z),
+        3,80,0.33);
     }
 
     core::window::swapBuffers();
