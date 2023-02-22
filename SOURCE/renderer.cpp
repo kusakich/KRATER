@@ -275,77 +275,24 @@ gl::Mesh* gl::renderer::renderObject<ChunkData>(ChunkData data)
 
         for(UInt32 i = 0; i < 16; i++)
         {
-          if(trianglesTable[index][i] < 0 || trianglesTable[index][i] > 11)
+          UInt32 vertex = trianglesTable[index][i];
+          if(vertex < 0 || vertex > 11)
             break;
 
-          vertexBuffer[vertexCount*vertexSize+0] = (Float32)x + pointsTable[trianglesTable[index][i]][0];
-          vertexBuffer[vertexCount*vertexSize+1] = (Float32)y + pointsTable[trianglesTable[index][i]][1];
-          vertexBuffer[vertexCount*vertexSize+2] = (Float32)z + pointsTable[trianglesTable[index][i]][2];
-          Float32 light = 0.0;
+          vertexBuffer[vertexCount*vertexSize+0] = (Float32)x + pointsTable[vertex][0];
+          vertexBuffer[vertexCount*vertexSize+1] = (Float32)y + pointsTable[vertex][1];
+          vertexBuffer[vertexCount*vertexSize+2] = (Float32)z + pointsTable[vertex][2];
 
-          switch(trianglesTable[index][i])
-          {
-            case 0:
-              light = (Float32)
-              (data.blocks[ z ][y+1][ x ].light+
-               data.blocks[ z ][y+1][x+1].light)/2.0/(Float32)Block::MAX_LIGHT;
-              break;
-            case 1:
-              light = (Float32)
-              (data.blocks[ z ][ y ][x+1].light+
-               data.blocks[ z ][y+1][x+1].light)/2.0/(Float32)Block::MAX_LIGHT;
-              break;
-            case 2:
-              light = (Float32)
-              (data.blocks[ z ][ y ][ x ].light+
-               data.blocks[ z ][ y ][x+1].light)/2.0/(Float32)Block::MAX_LIGHT;
-              break;
-            case 3:
-              light = (Float32)
-              (data.blocks[ z ][ y ][ x ].light+
-               data.blocks[ z ][y+1][ x ].light)/2.0/(Float32)Block::MAX_LIGHT;
-              break;
-            case 4:
-              light = (Float32)
-              (data.blocks[z+1][y+1][ x ].light+
-               data.blocks[z+1][y+1][x+1].light)/2.0/(Float32)Block::MAX_LIGHT;
-              break;
-            case 5:
-              light = (Float32)
-              (data.blocks[z+1][ y ][x+1].light+
-               data.blocks[z+1][y+1][x+1].light)/2.0/(Float32)Block::MAX_LIGHT;
-              break;
-            case 6:
-              light = (Float32)
-              (data.blocks[z+1][ y ][ x ].light+
-               data.blocks[z+1][ y ][x+1].light)/2.0/(Float32)Block::MAX_LIGHT;
-              break;
-            case 7:
-              light = (Float32)
-              (data.blocks[z+1][ y ][ x ].light+
-               data.blocks[z+1][y+1][ x ].light)/2.0/(Float32)Block::MAX_LIGHT;
-              break;
-            case 8:
-              light = (Float32)
-              (data.blocks[ z ][y+1][ x ].light+
-               data.blocks[z+1][y+1][ x ].light)/2.0/(Float32)Block::MAX_LIGHT;
-              break;
-            case 9:
-              light = (Float32)
-              (data.blocks[ z ][y+1][x+1].light+
-               data.blocks[z+1][y+1][x+1].light)/2.0/(Float32)Block::MAX_LIGHT;
-              break;
-            case 10:
-              light = (Float32)
-              (data.blocks[ z ][ y ][x+1].light+
-               data.blocks[z+1][ y ][x+1].light)/2.0/(Float32)Block::MAX_LIGHT;
-              break;
-            case 11:
-              light = (Float32)
-              (data.blocks[ z ][ y ][ x ].light+
-               data.blocks[z+1][ y ][ x ].light)/2.0/(Float32)Block::MAX_LIGHT;
-              break;
-          };
+          Float32 light =
+            (Float32)(
+            data.blocks[z+lightTable[vertex][2]]
+                       [y+lightTable[vertex][1]]
+                       [x+lightTable[vertex][0]].light+
+            data.blocks[z+lightTable[vertex][5]]
+                       [y+lightTable[vertex][4]]
+                       [x+lightTable[vertex][3]].light)/
+                       2.0/(Float32)Block::MAX_LIGHT;
+
 
           vertexBuffer[vertexCount*vertexSize+6] = light;
 
