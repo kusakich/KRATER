@@ -22,8 +22,6 @@ namespace core
   {
     void initialize();
     void pollEvents();
-    glm::vec2 getCursorPosition();
-    glm::vec2 getCursorDeltaPosition();
   }
 
   namespace keyboard
@@ -176,6 +174,15 @@ namespace core
     bool isClicked(Buttons button);
     bool isJustClicked(Buttons button);
   };
+
+  namespace cursor
+  {
+    glm::vec2 getPosition();
+    glm::vec2 getDeltaPosition();
+    void setPosition(glm::vec2 position);
+    bool isLocked();
+    void lock(bool lock);
+  }
 };
 
 #endif

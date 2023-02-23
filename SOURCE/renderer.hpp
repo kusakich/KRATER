@@ -7,18 +7,15 @@
 #include <shader.hpp>
 #include <camera.hpp>
 
-namespace gl
+namespace renderer
 {
-  namespace renderer
-  {
-    void initialize();
-    void finalize();
-    void drawRect(Rect rect);
-    void drawQuad(Quad quad, Camera camera);
-    void drawText(std::string text, Float32 x, Float32 y, Float32 scale);
+  void initialize();
+  void finalize();
+  void drawRect(Rect rect);
+  void drawQuad(Quad quad, Camera camera);
+  void drawText(std::string text, Float32 x, Float32 y, Float32 scale);
 
-    template<typename T> Mesh* renderObject(T object);
-  };
-}
+  template<typename T> gl::Mesh* renderObject(T object);
+};
 
 #endif

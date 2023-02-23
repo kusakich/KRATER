@@ -68,63 +68,61 @@ static const float basicQuadVertex[] =
  -0.5, 0.5,-0.5, 0.0,0.0,0.0, 0.0, 1.0
 };
 
-namespace gl
+namespace renderer
 {
-  namespace renderer
+  static gl::Mesh*          basicRectMesh;
+  static gl::ShaderProgram* basicRectShaderProgram;
+
+  static gl::Mesh*          basicQuadMesh;
+  static gl::ShaderProgram* basicQuadShaderProgram;
+
+  static gl::ShaderProgram* basicTextShaderProgram;
+
+  struct Character
   {
-    static Mesh*          basicRectMesh;
-    static ShaderProgram* basicRectShaderProgram;
+    UInt32     texture;
+    glm::ivec2 size;
+    glm::ivec2 bearing;
+    SInt64     advance;
+  };
+  static std::map<char, Character> characters;
 
-    static Mesh*          basicQuadMesh;
-    static ShaderProgram* basicQuadShaderProgram;
+  void initialize();
+  void finalize();
+  void drawQuad(Quad quad, Camera camera);
+  void drawRect(Rect rect);
+  void drawText(std::string text, Float32 x, Float32 y, Float32 scale);
 
-    static ShaderProgram* basicTextShaderProgram;
-
-    struct Character
-    {
-      UInt32     texture;
-      glm::ivec2 size;
-      glm::ivec2 bearing;
-      SInt64     advance;
-    };
-    static std::map<char, Character> characters;
-
-    void initialize();
-    void finalize();
-    void drawQuad(Quad quad, Camera camera);
-    void drawRect(Rect rect);
-    void drawText(std::string text, Float32 x, Float32 y, Float32 scale);
-
-    template<typename T> Mesh* renderObject(T object);
-  }
+  template<typename T> gl::Mesh* renderObject(T object);
 }
 
-void gl::renderer::initialize()
+
+void renderer::initialize()
 {
   ///////////RECT///////////
-  basicRectMesh = new Mesh(basicRectVertex, 6, (UInt32[]){2,2,0}, GL_TRIANGLES);
-  Shader* basicRectShaders[2];
-  basicRectShaders[0] = new Shader("BASE/SHADERS/rect.vert", gl::Shader::Type::VERTEX);
-  basicRectShaders[1] = new Shader("BASE/SHADERS/rect.frag", gl::Shader::Type::FRAGMENT);
-  basicRectShaderProgram = new ShaderProgram(2, basicRectShaders);
+  basicRectMesh = new gl::Mesh(basicRectVertex, 6, (UInt32[]){2,2,0}, GL_TRIANGLES);
+  gl::Shader* basicRectShaders[2];
+  basicRectShaders[0] = new gl::Shader("BASE/SHADERS/rect.vert", gl::Shader::Type::VERTEX);
+  basicRectShaders[1] = new gl::Shader("BASE/SHADERS/rect.frag", gl::Shader::Type::FRAGMENT);
+  basicRectShaderProgram = new gl::ShaderProgram(2, basicRectShaders);
   basicRectShaderProgram->addUniform("m");
   basicRectShaderProgram->addUniform("v");
 
   ///////////QUAD///////////
-  basicQuadMesh = new Mesh(basicQuadVertex, 36, (UInt32[]){3,3,2,0}, GL_TRIANGLES);
-  Shader* basicQuadShaders[2];
-  basicQuadShaders[0] = new Shader("BASE/SHADERS/quad.vert", gl::Shader::Type::VERTEX);
-  basicQuadShaders[1] = new Shader("BASE/SHADERS/quad.frag", gl::Shader::Type::FRAGMENT);
-  basicQuadShaderProgram = new ShaderProgram(2, basicQuadShaders);
+  basicQuadMesh = new gl::Mesh(basicQuadVertex, 36, (UInt32[]){3,3,2,0}, GL_TRIANGLES);
+  gl::Shader* basicQuadShaders[2];
+  basicQuadShaders[0] = new gl::Shader("BASE/SHADERS/quad.vert", gl::Shader::Type::VERTEX);
+  basicQuadShaders[1] = new gl::Shader("BASE/SHADERS/quad.frag", gl::Shader::Type::FRAGMENT);
+  basicQuadShaderProgram = new gl::ShaderProgram(2, basicQuadShaders);
   basicQuadShaderProgram->addUniform("m");
   basicQuadShaderProgram->addUniform("v");
   basicQuadShaderProgram->addUniform("p");
 
   ///////////TEXT///////////
-  Shader* basicTextShaders[2];
-  basicTextShaders[0] = new Shader("BASE/SHADERS/text.vert", gl::Shader::Type::VERTEX);
-  basicTextShaders[1] = new Shader("BASE/SHADERS/text.frag", gl::Shader::Type::FRAGMENT);
-  basicTextShaderProgram = new ShaderProgram(2, basicTextShaders);
+  gl::Shader* basicTextShaders[2];
+  basicTextShaders[0] = new gl::Shader("BASE/SHADERS/text.vert", gl::Shader::Type::VERTEX);
+  basicTextShaders[1] = new gl::Shader("BASE/SHADERS/text.frag", gl::Shader::Type::FRAGMENT);
+  basicTextShaderProgram = new gl::ShaderProgram(2, basicTextShaders);
   basicTextShaderProgram->addUniform("m");
   basicTextShaderProgram->addUniform("v");
   basicTextShaderProgram->addUniform("color");
@@ -180,7 +178,7 @@ void gl::renderer::initialize()
   FT_Done_FreeType(ft);
 }
 
-void gl::renderer::finalize()
+void renderer::finalize()
 {
   delete basicRectMesh;
   delete basicRectShaderProgram;
@@ -189,7 +187,7 @@ void gl::renderer::finalize()
   delete basicTextShaderProgram;
 }
 
-void gl::renderer::drawRect(Rect rect)
+void renderer::drawRect(Rect rect)
 {
   basicRectShaderProgram->bind();
   glm::mat4 rectModel =
@@ -204,7 +202,7 @@ void gl::renderer::drawRect(Rect rect)
   basicRectMesh->draw();
 }
 
-void gl::renderer::drawQuad(Quad quad, Camera camera)
+void renderer::drawQuad(Quad quad, Camera camera)
 {
   basicQuadShaderProgram->bind();
   glm::mat4 quadModel=
@@ -220,7 +218,7 @@ void gl::renderer::drawQuad(Quad quad, Camera camera)
   basicQuadMesh->draw();
 }
 
-void gl::renderer::drawText(std::string text, Float32 x, Float32 y, Float32 scale)
+void renderer::drawText(std::string text, Float32 x, Float32 y, Float32 scale)
 {
   std::string::const_iterator c;
   for (c = text.begin(); c != text.end(); c++)
@@ -251,7 +249,7 @@ void gl::renderer::drawText(std::string text, Float32 x, Float32 y, Float32 scal
 }
 
 template<>
-gl::Mesh* gl::renderer::renderObject<ChunkData>(ChunkData data)
+gl::Mesh* renderer::renderObject<ChunkData>(ChunkData data)
 {
   const   UInt32  vertexSize = 7;
   static  Float32 vertexBuffer[300000] = {0};

@@ -36,7 +36,7 @@ private:
 class World
 {
 public:
-  static const UInt32 WIDTH = 8;
+  static const UInt32 WIDTH = 4;
 
   World();
   ~World();

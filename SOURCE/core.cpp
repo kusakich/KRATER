@@ -121,8 +121,11 @@ namespace core
 
     static void cursorPositionCallback(GLFWwindow* window, Float64 x, Float64 y)
     {
-      cursorDeltaX = x - cursorX;
-      cursorDeltaY = y - cursorY;
+      if(cursorStarted) {
+        cursorDeltaX = x - cursorX;
+        cursorDeltaY = y - cursorY;
+      } else
+        cursorStarted = true;
 
       cursorX = x;
       cursorY = y;
@@ -148,8 +151,11 @@ namespace core
       glfwSetKeyCallback(window::window, keyCallback);
       glfwSetCursorPosCallback(window::window, cursorPositionCallback);
       glfwSetMouseButtonCallback(window::window, mouseButtonCallback);
-      glfwSetInputMode(window::window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-      glfwSetCursorPos(window::window, 0.0,0.0);
+      if(cursorLocked)
+        glfwSetInputMode(window::window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+      else
+        glfwSetInputMode(window::window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+      glfwSetCursorPos(window::window, window::width/2,window::height/2);
     }
 
     void pollEvents()
@@ -159,16 +165,6 @@ namespace core
       cursorDeltaY = 0.0;
       scroll = 0.0;
       glfwPollEvents();
-    }
-
-    glm::vec2 getCursorPosition()
-    {
-      return glm::vec2(cursorX, cursorY);
-    }
-
-    glm::vec2 getCursorDeltaPosition()
-    {
-      return glm::vec2(cursorDeltaX, cursorDeltaY);
     }
   };
 
@@ -197,6 +193,44 @@ namespace core
     bool isJustClicked(Buttons button)
     {
       return events::keys[events::MOUSE_BUTTONS+button] && (events::frames[events::MOUSE_BUTTONS+button] == events::current);
+    }
+  }
+
+  namespace cursor
+  {
+    glm::vec2 getPosition()
+    {
+      if(events::cursorStarted)
+        return glm::vec2(events::cursorX, events::cursorY);
+      else
+        return glm::vec2(0);
+    }
+
+    glm::vec2 getDeltaPosition()
+    {
+      if(events::cursorStarted)
+        return glm::vec2(events::cursorDeltaX, events::cursorDeltaY);
+      else
+        return glm::vec2(0);
+    }
+
+    void setPosition(glm::vec2 position)
+    {
+      glfwSetCursorPos(window::window, position.x, position.y);
+    }
+
+    bool isLocked()
+    {
+      return events::cursorLocked;
+    }
+
+    void lock(bool lock)
+    {
+      events::cursorLocked = lock;
+      if(events::cursorLocked)
+        glfwSetInputMode(window::window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+      else
+        glfwSetInputMode(window::window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
     }
   }
 };

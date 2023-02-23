@@ -14,7 +14,7 @@ int main()
 {
   spdlog::info("Starting");
   bool running = true;
-  bool isShowF3 = true;
+  bool isShowF3 = false;
 
   mINI::INIFile settingsFile("BASE/settings.ini");
   mINI::INIStructure settings;
@@ -27,7 +27,7 @@ int main()
 
   core::window::create(windowTitle.c_str(), windowWidth, windowHeight);
   core::events::initialize();
-  gl::renderer::initialize();
+  renderer::initialize();
 
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_CULL_FACE);
@@ -50,7 +50,7 @@ int main()
   for(UInt32 y = 0; y < World::WIDTH; ++y)
     for(UInt32 x = 0; x < World::WIDTH; ++x)
     {
-      chunkMeshes[y][x] = gl::renderer::renderObject<ChunkData>(world->getChunk(x,y)->getData());
+      chunkMeshes[y][x] = renderer::renderObject<ChunkData>(world->getChunk(x,y)->getData());
     }
 
   gl::Texture* selectTexture = new gl::Texture("BASE/GUI/select.png");
@@ -71,6 +71,12 @@ int main()
 
     if(core::keyboard::isJustPressed(core::keyboard::Keys::F3))
       isShowF3 = !isShowF3;
+
+    if(core::keyboard::isJustPressed(core::keyboard::Keys::TAB))
+    {
+      core::cursor::lock(!core::cursor::isLocked());
+      core::cursor::setPosition(glm::vec2(windowWidth/2, windowHeight/2));
+    }
 
     core::events::pollEvents();
 
@@ -106,17 +112,19 @@ int main()
     if(core::keyboard::isPressed(core::keyboard::Keys::LSHIFT))
       mainCamera.translate(glm::vec3(0.0,0.0,-10.0*deltaTime));
 
-    if(core::keyboard::isPressed(core::keyboard::Keys::NUMPAD_8))
+    if(core::keyboard::isPressed(core::keyboard::Keys::UP))
       mainCamera.rotateX( 3.0*deltaTime);
-    if(core::keyboard::isPressed(core::keyboard::Keys::NUMPAD_2))
+    if(core::keyboard::isPressed(core::keyboard::Keys::DOWN))
       mainCamera.rotateX(-3.0*deltaTime);
-    if(core::keyboard::isPressed(core::keyboard::Keys::NUMPAD_6))
+    if(core::keyboard::isPressed(core::keyboard::Keys::RIGHT))
       mainCamera.rotateZ( 5.0*deltaTime);
-    if(core::keyboard::isPressed(core::keyboard::Keys::NUMPAD_4))
+    if(core::keyboard::isPressed(core::keyboard::Keys::LEFT))
       mainCamera.rotateZ(-5.0*deltaTime);
 
-    mainCamera.rotateX(-(Float64)core::events::getCursorDeltaPosition().y*deltaTime*1.7);
-    mainCamera.rotateZ( (Float64)core::events::getCursorDeltaPosition().x*deltaTime*1.7);
+    if(core::cursor::isLocked()) {
+      mainCamera.rotateX(-(Float64)core::cursor::getDeltaPosition().y*deltaTime*1.7);
+      mainCamera.rotateZ( (Float64)core::cursor::getDeltaPosition().x*deltaTime*1.7);
+    }
 
     mainCamera.update();
 
@@ -140,7 +148,7 @@ int main()
                                    (SInt32)round(select.y),
                                    (SInt32)round(select.z));
 
-    if(core::mouse::isClicked(core::mouse::Buttons::LEFT))
+    if(core::mouse::isClicked(core::mouse::Buttons::LEFT) && core::cursor::isLocked())
     {
       world->setBlockType(iselect.x,iselect.y,iselect.z, 0);
       Chunk * currentChunk = world->getChunk(iselect.x/Chunk::WIDTH,iselect.y/Chunk::WIDTH);
@@ -149,11 +157,11 @@ int main()
         currentChunk->computeLight();
         delete chunkMeshes[iselect.y/Chunk::WIDTH][iselect.x/Chunk::WIDTH];
         chunkMeshes[iselect.y/Chunk::WIDTH][iselect.x/Chunk::WIDTH] =
-        gl::renderer::renderObject<ChunkData>(currentChunk->getData());
+        renderer::renderObject<ChunkData>(currentChunk->getData());
       }
     }
 
-    if(core::mouse::isClicked(core::mouse::Buttons::RIGHT))
+    if(core::mouse::isClicked(core::mouse::Buttons::RIGHT) && core::cursor::isLocked())
     {
       select = mainCamera.raycast(-0.4);
       iselect = glm::vec3((SInt32)round(select.x),
@@ -167,42 +175,49 @@ int main()
         currentChunk->computeLight();
         delete chunkMeshes[iselect.y/Chunk::WIDTH][iselect.x/Chunk::WIDTH];
         chunkMeshes[iselect.y/Chunk::WIDTH][iselect.x/Chunk::WIDTH] =
-        gl::renderer::renderObject<ChunkData>(currentChunk->getData());
+        renderer::renderObject<ChunkData>(currentChunk->getData());
       }
     }
 
     selectTexture->bind();
-    gl::renderer::drawRect(Rect(windowWidth/2-8,
-                                windowHeight/2-8,
-                                16, 16));
+    if(core::cursor::isLocked())
+    {
+      renderer::drawRect(Rect(windowWidth/2-8,
+                                  windowHeight/2-8,
+                                  16, 16));
+    } else {
+      renderer::drawRect(Rect(core::cursor::getPosition().x,
+                                  core::cursor::getPosition().y,
+                                  16, 16));
+    }
 
     if(isShowF3)
     {
       UInt32  fps = (UInt32)(1.0/deltaTime);
-      gl::renderer::drawText("FPS: " + std::to_string(fps),3,16,0.33);
-      gl::renderer::drawText("KRATER alpha 1",3,32,0.33);
-      gl::renderer::drawText(
+      renderer::drawText("FPS: " + std::to_string(fps),5,16,0.33);
+      renderer::drawText("KRATER alpha 1",5,32,0.33);
+      renderer::drawText(
         "pos  "
         + std::to_string(mainCamera.position.x).erase(std::to_string(mainCamera.position.x).size()-4) + " "
         + std::to_string(mainCamera.position.y).erase(std::to_string(mainCamera.position.y).size()-4) + " "
         + std::to_string(mainCamera.position.z).erase(std::to_string(mainCamera.position.z).size()-4),
-        3,48,0.33);
-      gl::renderer::drawText(
+        5,48,0.33);
+      renderer::drawText(
         "rot  "
         + std::to_string(mainCamera.rotation.x).erase(std::to_string(mainCamera.rotation.x).size()-4) + " "
         + std::to_string(mainCamera.rotation.y).erase(std::to_string(mainCamera.rotation.y).size()-4) + " "
         + std::to_string(mainCamera.rotation.z).erase(std::to_string(mainCamera.rotation.z).size()-4),
-        3,64,0.33);
-      gl::renderer::drawText("block "
+        5,64,0.33);
+      renderer::drawText("block "
         + std::to_string(iselect.x) + " "
         + std::to_string(iselect.y) + " "
         + std::to_string(iselect.z),
-        3,80,0.33);
+        5,80,0.33);
     }
 
     core::window::swapBuffers();
   }
 
-  gl::renderer::finalize();
+  renderer::finalize();
   core::window::destroy();
 }
