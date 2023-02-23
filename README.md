@@ -1,6 +1,7 @@
 # KRATER
 
 Прототип моей игры.
+![](BASE/SCREENSHOTS/screenshot.jpg)
 
 ## Управление
 
