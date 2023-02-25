@@ -3,9 +3,10 @@
 #include <mesh.hpp>
 #include <shader.hpp>
 #include <camera.hpp>
+#include <world.hpp>
 
 class worldRenderer
 {
-  worldRenderer();
+  worldRenderer(World* world);
   ~worldRenderer();
 }

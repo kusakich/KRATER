@@ -249,7 +249,7 @@ void renderer::drawText(std::string text, Float32 x, Float32 y, Float32 scale)
 }
 
 template<>
-gl::Mesh* renderer::renderObject<ChunkData>(ChunkData data)
+gl::Mesh* renderer::renderObject<Chunk*>(Chunk* chunk)
 {
   const   UInt32  vertexSize = 7;
   static  Float32 vertexBuffer[300000] = {0};
@@ -259,14 +259,14 @@ gl::Mesh* renderer::renderObject<ChunkData>(ChunkData data)
     for(UInt32 y = 0; y < Chunk::WIDTH-1; y++) {
       for(UInt32 x = 0; x < Chunk::WIDTH-1; x++) {
         UInt8 index = 0;
-        index = index | ((1 << 0) & ((!!data.blocks[ z ][y+1][ x ].type) << 0));
-        index = index | ((1 << 1) & ((!!data.blocks[ z ][y+1][x+1].type) << 1));
-        index = index | ((1 << 2) & ((!!data.blocks[ z ][ y ][x+1].type) << 2));
-        index = index | ((1 << 3) & ((!!data.blocks[ z ][ y ][ x ].type) << 3));
-        index = index | ((1 << 4) & ((!!data.blocks[z+1][y+1][ x ].type) << 4));
-        index = index | ((1 << 5) & ((!!data.blocks[z+1][y+1][x+1].type) << 5));
-        index = index | ((1 << 6) & ((!!data.blocks[z+1][ y ][x+1].type) << 6));
-        index = index | ((1 << 7) & ((!!data.blocks[z+1][ y ][ x ].type) << 7));
+        index = index | ((1 << 0) & ((!!chunk->blocks[ z ][y+1][ x ].type) << 0));
+        index = index | ((1 << 1) & ((!!chunk->blocks[ z ][y+1][x+1].type) << 1));
+        index = index | ((1 << 2) & ((!!chunk->blocks[ z ][ y ][x+1].type) << 2));
+        index = index | ((1 << 3) & ((!!chunk->blocks[ z ][ y ][ x ].type) << 3));
+        index = index | ((1 << 4) & ((!!chunk->blocks[z+1][y+1][ x ].type) << 4));
+        index = index | ((1 << 5) & ((!!chunk->blocks[z+1][y+1][x+1].type) << 5));
+        index = index | ((1 << 6) & ((!!chunk->blocks[z+1][ y ][x+1].type) << 6));
+        index = index | ((1 << 7) & ((!!chunk->blocks[z+1][ y ][ x ].type) << 7));
 
         if((!index) || (index==255))
           continue;
@@ -283,13 +283,13 @@ gl::Mesh* renderer::renderObject<ChunkData>(ChunkData data)
 
           Float32 light =
             (Float32)(
-            data.blocks[z+lightTable[vertex][2]]
-                       [y+lightTable[vertex][1]]
-                       [x+lightTable[vertex][0]].light+
-            data.blocks[z+lightTable[vertex][5]]
-                       [y+lightTable[vertex][4]]
-                       [x+lightTable[vertex][3]].light)/
-                       2.0/(Float32)Block::MAX_LIGHT;
+            chunk->blocks[z+lightTable[vertex][2]]
+                         [y+lightTable[vertex][1]]
+                         [x+lightTable[vertex][0]].light+
+            chunk->blocks[z+lightTable[vertex][5]]
+                         [y+lightTable[vertex][4]]
+                         [x+lightTable[vertex][3]].light)/
+                          2.0/(Float32)Block::MAX_LIGHT;
 
 
           vertexBuffer[vertexCount*vertexSize+6] = light;

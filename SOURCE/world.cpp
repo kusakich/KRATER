@@ -1,37 +1,35 @@
 #include <world.hpp>
 
-Chunk::Chunk(UInt32 globalX, UInt32 globalY)
+Chunk::Chunk(glm::uvec2 pindex) : index(pindex)
 {
   for(UInt32 z = 0; z < Chunk::WIDTH; z++)
     for(UInt32 x = 0; x < Chunk::WIDTH; x++)
       for(UInt32 y = 0; y < Chunk::WIDTH; y++)
       {
-        data.blocks[z][y][x].type  = 0;
-        data.blocks[z][y][x].light = 0;
+        blocks[z][y][x].type  = 0;
+        blocks[z][y][x].light = 0;
       }
 
-  for(UInt32 z = 0; z < Chunk::WIDTH-8; z++)
-    for(UInt32 x = 0; x < Chunk::WIDTH; x++)
-      for(UInt32 y = 0; y < Chunk::WIDTH; y++)
+  for(UInt32 x = 0; x < Chunk::WIDTH; x++)
+    for(UInt32 y = 0; y < Chunk::WIDTH; y++)
+    {
+      Float64 h = glm::perlin(glm::vec3((Float64)(x+index.x*WIDTH)*0.1,
+                                        (Float64)(y+index.y*WIDTH)*0.1,
+                                        0.0));
+
+      for(UInt32 z = 0; z < Chunk::WIDTH; z++)
       {
-        Float64 id = glm::perlin(glm::vec3((Float64)(x+globalX)*0.1,(Float64)(y+globalY)*0.1,(Float64)z*0.1));
-        if(id < -0.1) data.blocks[z][y][x].type = 0;
-        else          data.blocks[z][y][x].type = 1;
-
-        if(z == 0) data.blocks[z][y][x].type = 1;
+        if(z < (h+0.5)*10)
+          blocks[z][y][x].type = 1;
       }
-}
-
-ChunkData Chunk::getData()
-{
-  return data;
+    }
 }
 
 void Chunk::setBlockType(UInt32 x, UInt32 y, UInt32 z, UInt32 type)
 {
   if( x >= 0 && x < Chunk::WIDTH &&
       y >= 0 && y < Chunk::WIDTH &&
-      z >= 0 && z < Chunk::WIDTH) data.blocks[z][y][x].type = type;
+      z >= 0 && z < Chunk::WIDTH) blocks[z][y][x].type = type;
 }
 
 void Chunk::computeLight()
@@ -40,15 +38,15 @@ void Chunk::computeLight()
     for(UInt32 x = 0; x < Chunk::WIDTH; x++)
       for(UInt32 y = 0; y < Chunk::WIDTH; y++)
       {
-        data.blocks[z][y][x].light = 0;
+        blocks[z][y][x].light = 0;
       }
   for(UInt32 x = 0; x < Chunk::WIDTH; x++)
     for(UInt32 y = 0; y < Chunk::WIDTH; y++)
     {
       for(SInt32 z = Chunk::WIDTH-1; z >= 0; z--)
       {
-        data.blocks[z][y][x].light = Block::MAX_LIGHT;
-        if (data.blocks[z][y][x].type) break;
+        blocks[z][y][x].light = Block::MAX_LIGHT;
+        if (blocks[z][y][x].type) break;
       }
     }
 }
@@ -59,7 +57,7 @@ World::World()
     for (UInt32 j = 0; j < World::WIDTH; ++j)
     {
       chunks[i][j] = nullptr;
-      chunks[i][j] = new Chunk(j*Chunk::WIDTH, i*Chunk::WIDTH);
+      chunks[i][j] = new Chunk(glm::uvec2(j, i));
       chunks[i][j]->computeLight();
     }
 }

@@ -50,7 +50,7 @@ int main()
   for(UInt32 y = 0; y < World::WIDTH; ++y)
     for(UInt32 x = 0; x < World::WIDTH; ++x)
     {
-      chunkMeshes[y][x] = renderer::renderObject<ChunkData>(world->getChunk(x,y)->getData());
+      chunkMeshes[y][x] = renderer::renderObject<Chunk*>(world->getChunk(x,y));
     }
 
   gl::Texture* selectTexture = new gl::Texture("BASE/GUI/select.png");
@@ -157,7 +157,7 @@ int main()
         currentChunk->computeLight();
         delete chunkMeshes[iselect.y/Chunk::WIDTH][iselect.x/Chunk::WIDTH];
         chunkMeshes[iselect.y/Chunk::WIDTH][iselect.x/Chunk::WIDTH] =
-        renderer::renderObject<ChunkData>(currentChunk->getData());
+        renderer::renderObject<Chunk*>(currentChunk);
       }
     }
 
@@ -175,7 +175,7 @@ int main()
         currentChunk->computeLight();
         delete chunkMeshes[iselect.y/Chunk::WIDTH][iselect.x/Chunk::WIDTH];
         chunkMeshes[iselect.y/Chunk::WIDTH][iselect.x/Chunk::WIDTH] =
-        renderer::renderObject<ChunkData>(currentChunk->getData());
+        renderer::renderObject<Chunk*>(currentChunk);
       }
     }
 
