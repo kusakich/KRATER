@@ -93,7 +93,7 @@ namespace renderer
   void drawRect(Rect rect);
   void drawText(std::string text, Float32 x, Float32 y, Float32 scale);
 
-  template<typename T> gl::Mesh* renderObject(T object);
+  gl::Mesh* renderChunk(World* world, glm::uvec2 chunkIndex);
 }
 
 
@@ -239,7 +239,10 @@ void renderer::drawText(std::string text, Float32 x, Float32 y, Float32 scale)
       0.0,         0.0, 1.0, 0.0,
       rect.position.x,
       rect.position.y,  0.0, 1.0};
-    glm::mat4 rectView  = glm::ortho(0.0f, (Float32)core::window::getWidth(), (Float32)core::window::getHeight(), 0.0f);
+    glm::mat4 rectView  = glm::ortho(0.0f,
+                                    (Float32)core::window::getWidth(),
+                                    (Float32)core::window::getHeight(),
+                                     0.0f);
     basicTextShaderProgram->uniform<glm::mat4>("m", rectModel);
     basicTextShaderProgram->uniform<glm::mat4>("v", rectView);
     basicTextShaderProgram->uniform<glm::vec3>("color", glm::vec3(1.0));
@@ -248,25 +251,82 @@ void renderer::drawText(std::string text, Float32 x, Float32 y, Float32 scale)
   }
 }
 
-template<>
-gl::Mesh* renderer::renderObject<Chunk*>(Chunk* chunk)
+gl::Mesh* renderer::renderChunk(World* world, glm::uvec2 chunkIndex)
 {
+  if(world == nullptr)
+    return nullptr;
+
+  Chunk* chunk = world->getChunk(chunkIndex);
+
+  if(chunk == nullptr)
+    return nullptr;
+
   const   UInt32  vertexSize = 7;
   static  Float32 vertexBuffer[300000] = {0};
   std::fill(vertexBuffer, &vertexBuffer[299999], 0);
   UInt32  vertexCount = 0;
   for(UInt32 z = 0; z < Chunk::WIDTH-1; z++) {
-    for(UInt32 y = 0; y < Chunk::WIDTH-1; y++) {
-      for(UInt32 x = 0; x < Chunk::WIDTH-1; x++) {
+    for(UInt32 y = 0; y < Chunk::WIDTH; y++) {
+      for(UInt32 x = 0; x < Chunk::WIDTH; x++) {
         UInt8 index = 0;
-        index = index | ((1 << 0) & ((!!chunk->blocks[ z ][y+1][ x ].type) << 0));
-        index = index | ((1 << 1) & ((!!chunk->blocks[ z ][y+1][x+1].type) << 1));
-        index = index | ((1 << 2) & ((!!chunk->blocks[ z ][ y ][x+1].type) << 2));
-        index = index | ((1 << 3) & ((!!chunk->blocks[ z ][ y ][ x ].type) << 3));
-        index = index | ((1 << 4) & ((!!chunk->blocks[z+1][y+1][ x ].type) << 4));
-        index = index | ((1 << 5) & ((!!chunk->blocks[z+1][y+1][x+1].type) << 5));
-        index = index | ((1 << 6) & ((!!chunk->blocks[z+1][ y ][x+1].type) << 6));
-        index = index | ((1 << 7) & ((!!chunk->blocks[z+1][ y ][ x ].type) << 7));
+        if(x < Chunk::WIDTH-1 && y < Chunk::WIDTH-1)
+        {
+          index = index | ((1 << 0) & ((!!chunk->blocks[ z ][y+1][ x ].type) << 0));
+          index = index | ((1 << 1) & ((!!chunk->blocks[ z ][y+1][x+1].type) << 1));
+          index = index | ((1 << 2) & ((!!chunk->blocks[ z ][ y ][x+1].type) << 2));
+          index = index | ((1 << 3) & ((!!chunk->blocks[ z ][ y ][ x ].type) << 3));
+          index = index | ((1 << 4) & ((!!chunk->blocks[z+1][y+1][ x ].type) << 4));
+          index = index | ((1 << 5) & ((!!chunk->blocks[z+1][y+1][x+1].type) << 5));
+          index = index | ((1 << 6) & ((!!chunk->blocks[z+1][ y ][x+1].type) << 6));
+          index = index | ((1 << 7) & ((!!chunk->blocks[z+1][ y ][ x ].type) << 7));
+        } else
+        if(x == Chunk::WIDTH-1 && y < Chunk::WIDTH-1)
+        {
+          Chunk* chunk2 = world->getChunk(glm::uvec2(chunkIndex.x+1,chunkIndex.y));
+          if(chunk2 != nullptr)
+          {
+            index = index | ((1 << 0) & ((!!chunk ->blocks[ z ][y+1][ x ].type) << 0));
+            index = index | ((1 << 1) & ((!!chunk2->blocks[ z ][y+1][ 0 ].type) << 1));
+            index = index | ((1 << 2) & ((!!chunk2->blocks[ z ][ y ][ 0 ].type) << 2));
+            index = index | ((1 << 3) & ((!!chunk ->blocks[ z ][ y ][ x ].type) << 3));
+            index = index | ((1 << 4) & ((!!chunk ->blocks[z+1][y+1][ x ].type) << 4));
+            index = index | ((1 << 5) & ((!!chunk2->blocks[z+1][y+1][ 0 ].type) << 5));
+            index = index | ((1 << 6) & ((!!chunk2->blocks[z+1][ y ][ 0 ].type) << 6));
+            index = index | ((1 << 7) & ((!!chunk ->blocks[z+1][ y ][ x ].type) << 7));
+          }
+        } else
+        if(x < Chunk::WIDTH-1 && y == Chunk::WIDTH-1)
+        {
+          Chunk* chunk2 = world->getChunk(glm::uvec2(chunkIndex.x,chunkIndex.y+1));
+          if(chunk2 != nullptr)
+          {
+            index = index | ((1 << 0) & ((!!chunk2->blocks[ z ][ 0 ][ x ].type) << 0));
+            index = index | ((1 << 1) & ((!!chunk2->blocks[ z ][ 0 ][x+1].type) << 1));
+            index = index | ((1 << 2) & ((!!chunk ->blocks[ z ][ y ][x+1].type) << 2));
+            index = index | ((1 << 3) & ((!!chunk ->blocks[ z ][ y ][ x ].type) << 3));
+            index = index | ((1 << 4) & ((!!chunk2->blocks[z+1][ 0 ][ x ].type) << 4));
+            index = index | ((1 << 5) & ((!!chunk2->blocks[z+1][ 0 ][x+1].type) << 5));
+            index = index | ((1 << 6) & ((!!chunk ->blocks[z+1][ y ][x+1].type) << 6));
+            index = index | ((1 << 7) & ((!!chunk ->blocks[z+1][ y ][ x ].type) << 7));
+          }
+        } else
+        if(x == Chunk::WIDTH-1 && y == Chunk::WIDTH-1)
+        {
+          Chunk* chunk2 = world->getChunk(glm::uvec2(chunkIndex.x+1,chunkIndex.y));
+          Chunk* chunk3 = world->getChunk(glm::uvec2(chunkIndex.x,chunkIndex.y+1));
+          Chunk* chunk4 = world->getChunk(glm::uvec2(chunkIndex.x+1,chunkIndex.y+1));
+          if(chunk2 != nullptr && chunk3 != nullptr && chunk4 != nullptr)
+          {
+            index = index | ((1 << 0) & ((!!chunk3->blocks[ z ][ 0 ][ x ].type) << 0));
+            index = index | ((1 << 1) & ((!!chunk4->blocks[ z ][ 0 ][ 0 ].type) << 1));
+            index = index | ((1 << 2) & ((!!chunk2->blocks[ z ][ y ][ 0 ].type) << 2));
+            index = index | ((1 << 3) & ((!!chunk ->blocks[ z ][ y ][ x ].type) << 3));
+            index = index | ((1 << 4) & ((!!chunk3->blocks[z+1][ 0 ][ x ].type) << 4));
+            index = index | ((1 << 5) & ((!!chunk4->blocks[z+1][ 0 ][ 0 ].type) << 5));
+            index = index | ((1 << 6) & ((!!chunk2->blocks[z+1][ y ][ 0 ].type) << 6));
+            index = index | ((1 << 7) & ((!!chunk ->blocks[z+1][ y ][ x ].type) << 7));
+          }
+        }
 
         if((!index) || (index==255))
           continue;

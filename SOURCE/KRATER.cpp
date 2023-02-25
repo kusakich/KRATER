@@ -50,7 +50,7 @@ int main()
   for(UInt32 y = 0; y < World::WIDTH; ++y)
     for(UInt32 x = 0; x < World::WIDTH; ++x)
     {
-      chunkMeshes[y][x] = renderer::renderObject<Chunk*>(world->getChunk(x,y));
+      chunkMeshes[y][x] = renderer::renderChunk(world, glm::uvec2(x,y));
     }
 
   gl::Texture* selectTexture = new gl::Texture("BASE/GUI/select.png");
@@ -139,7 +139,10 @@ int main()
     for(UInt32 y = 0; y < World::WIDTH; ++y)
       for(UInt32 x = 0; x < World::WIDTH; ++x)
       {
-        chunkShaderProgram->uniform<glm::mat4>("m", glm::translate(glm::mat4(1), glm::vec3(x*Chunk::WIDTH,y*Chunk::WIDTH,0.0)));
+        chunkShaderProgram->uniform<glm::mat4>("m", glm::translate(glm::mat4(1),
+                                                    glm::vec3(x*Chunk::WIDTH,
+                                                              y*Chunk::WIDTH,
+                                                              0.0)));
         chunkMeshes[y][x]->draw();
       }
 
@@ -151,13 +154,14 @@ int main()
     if(core::mouse::isClicked(core::mouse::Buttons::LEFT) && core::cursor::isLocked())
     {
       world->setBlockType(iselect.x,iselect.y,iselect.z, 0);
-      Chunk * currentChunk = world->getChunk(iselect.x/Chunk::WIDTH,iselect.y/Chunk::WIDTH);
+      Chunk * currentChunk = world->getChunk(glm::uvec2(iselect.x/Chunk::WIDTH,
+                                                        iselect.y/Chunk::WIDTH));
       if(currentChunk != nullptr)
       {
         currentChunk->computeLight();
         delete chunkMeshes[iselect.y/Chunk::WIDTH][iselect.x/Chunk::WIDTH];
         chunkMeshes[iselect.y/Chunk::WIDTH][iselect.x/Chunk::WIDTH] =
-        renderer::renderObject<Chunk*>(currentChunk);
+        renderer::renderChunk(world, currentChunk->index);
       }
     }
 
@@ -169,13 +173,14 @@ int main()
                           (SInt32)round(select.z));
 
       world->setBlockType(iselect.x,iselect.y,iselect.z,1);
-      Chunk * currentChunk = world->getChunk(iselect.x/Chunk::WIDTH,iselect.y/Chunk::WIDTH);
+      Chunk * currentChunk = world->getChunk(glm::uvec2(iselect.x/Chunk::WIDTH,
+                                                        iselect.y/Chunk::WIDTH));
       if(currentChunk != nullptr)
       {
         currentChunk->computeLight();
         delete chunkMeshes[iselect.y/Chunk::WIDTH][iselect.x/Chunk::WIDTH];
         chunkMeshes[iselect.y/Chunk::WIDTH][iselect.x/Chunk::WIDTH] =
-        renderer::renderObject<Chunk*>(currentChunk);
+        renderer::renderChunk(world, currentChunk->index);
       }
     }
 

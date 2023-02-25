@@ -19,7 +19,7 @@ Chunk::Chunk(glm::uvec2 pindex) : index(pindex)
 
       for(UInt32 z = 0; z < Chunk::WIDTH; z++)
       {
-        if(z < (h+0.5)*10)
+        if(z < (h+0.5)*7+2)
           blocks[z][y][x].type = 1;
       }
     }
@@ -85,10 +85,10 @@ void World::setBlockType(UInt32 x, UInt32 y, UInt32 z, UInt32 type)
   }
 }
 
-Chunk * World::getChunk(UInt32 i, UInt32 j)
+Chunk * World::getChunk(glm::uvec2 index)
 {
-  if(i >= 0 && i < World::WIDTH &&
-     j >= 0 && j < World::WIDTH) return chunks[j][i];
+  if(index.x >= 0 && index.x < World::WIDTH &&
+     index.y >= 0 && index.y < World::WIDTH) return chunks[index.y][index.x];
 
   return nullptr;
 }

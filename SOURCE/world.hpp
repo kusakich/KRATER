@@ -34,7 +34,7 @@ public:
   ~World();
 
   void setBlockType(UInt32 x, UInt32 y, UInt32 z, UInt32 type);
-  Chunk * getChunk(UInt32 i, UInt32 j);
+  Chunk * getChunk(glm::uvec2 index);
 private:
   Chunk * chunks[World::WIDTH][World::WIDTH];
 };

@@ -15,7 +15,7 @@ namespace renderer
   void drawQuad(Quad quad, Camera camera);
   void drawText(std::string text, Float32 x, Float32 y, Float32 scale);
 
-  template<typename T> gl::Mesh* renderObject(T object);
+  gl::Mesh* renderChunk(World* world, glm::uvec2 chunkIndex);
 };
 
 #endif
