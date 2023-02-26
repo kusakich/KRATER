@@ -18,8 +18,11 @@ public:
   static const UInt32 VOLUME = WIDTH*WIDTH*WIDTH;
   Chunk(glm::uvec2 index);
   ~Chunk();
-  void setBlockType(UInt32 x, UInt32 y, UInt32 z, UInt32 type);
-  void computeLight();
+
+  void   setBlockType (UInt32 x, UInt32 y, UInt32 z, UInt32 type);
+  UInt32 getBlockType (UInt32 x, UInt32 y, UInt32 z);
+  UInt32 getBlockLight(UInt32 x, UInt32 y, UInt32 z);
+  void   computeLight();
 
   glm::uvec2 index;
   Block blocks[WIDTH][WIDTH][WIDTH];
@@ -33,7 +36,10 @@ public:
   World();
   ~World();
 
-  void setBlockType(UInt32 x, UInt32 y, UInt32 z, UInt32 type);
+  void   setBlockType (UInt32 x, UInt32 y, UInt32 z, UInt32 type);
+  UInt32 getBlockType (UInt32 x, UInt32 y, UInt32 z);
+  UInt32 getBlockLight(UInt32 x, UInt32 y, UInt32 z);
+
   Chunk * getChunk(glm::uvec2 index);
 private:
   Chunk * chunks[World::WIDTH][World::WIDTH];

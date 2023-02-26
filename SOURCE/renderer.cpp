@@ -256,7 +256,10 @@ gl::Mesh* renderer::renderChunk(World* world, glm::uvec2 chunkIndex)
   if(world == nullptr)
     return nullptr;
 
-  Chunk* chunk = world->getChunk(chunkIndex);
+  Chunk* chunk  = world->getChunk(chunkIndex);
+  Chunk* chunk2 = world->getChunk(glm::uvec2(chunkIndex.x+1,chunkIndex.y));
+  Chunk* chunk3 = world->getChunk(glm::uvec2(chunkIndex.x,chunkIndex.y+1));
+  Chunk* chunk4 = world->getChunk(glm::uvec2(chunkIndex.x+1,chunkIndex.y+1));
 
   if(chunk == nullptr)
     return nullptr;
@@ -280,52 +283,39 @@ gl::Mesh* renderer::renderChunk(World* world, glm::uvec2 chunkIndex)
           index = index | ((1 << 6) & ((!!chunk->blocks[z+1][ y ][x+1].type) << 6));
           index = index | ((1 << 7) & ((!!chunk->blocks[z+1][ y ][ x ].type) << 7));
         } else
-        if(x == Chunk::WIDTH-1 && y < Chunk::WIDTH-1)
+        if(x == Chunk::WIDTH-1 && y < Chunk::WIDTH-1 && chunk2 != nullptr)
         {
-          Chunk* chunk2 = world->getChunk(glm::uvec2(chunkIndex.x+1,chunkIndex.y));
-          if(chunk2 != nullptr)
-          {
-            index = index | ((1 << 0) & ((!!chunk ->blocks[ z ][y+1][ x ].type) << 0));
-            index = index | ((1 << 1) & ((!!chunk2->blocks[ z ][y+1][ 0 ].type) << 1));
-            index = index | ((1 << 2) & ((!!chunk2->blocks[ z ][ y ][ 0 ].type) << 2));
-            index = index | ((1 << 3) & ((!!chunk ->blocks[ z ][ y ][ x ].type) << 3));
-            index = index | ((1 << 4) & ((!!chunk ->blocks[z+1][y+1][ x ].type) << 4));
-            index = index | ((1 << 5) & ((!!chunk2->blocks[z+1][y+1][ 0 ].type) << 5));
-            index = index | ((1 << 6) & ((!!chunk2->blocks[z+1][ y ][ 0 ].type) << 6));
-            index = index | ((1 << 7) & ((!!chunk ->blocks[z+1][ y ][ x ].type) << 7));
-          }
+          index = index | ((1 << 0) & ((!!chunk ->blocks[ z ][y+1][ x ].type) << 0));
+          index = index | ((1 << 1) & ((!!chunk2->blocks[ z ][y+1][ 0 ].type) << 1));
+          index = index | ((1 << 2) & ((!!chunk2->blocks[ z ][ y ][ 0 ].type) << 2));
+          index = index | ((1 << 3) & ((!!chunk ->blocks[ z ][ y ][ x ].type) << 3));
+          index = index | ((1 << 4) & ((!!chunk ->blocks[z+1][y+1][ x ].type) << 4));
+          index = index | ((1 << 5) & ((!!chunk2->blocks[z+1][y+1][ 0 ].type) << 5));
+          index = index | ((1 << 6) & ((!!chunk2->blocks[z+1][ y ][ 0 ].type) << 6));
+          index = index | ((1 << 7) & ((!!chunk ->blocks[z+1][ y ][ x ].type) << 7));
         } else
-        if(x < Chunk::WIDTH-1 && y == Chunk::WIDTH-1)
+        if(x < Chunk::WIDTH-1 && y == Chunk::WIDTH-1 && chunk3 != nullptr)
         {
-          Chunk* chunk2 = world->getChunk(glm::uvec2(chunkIndex.x,chunkIndex.y+1));
-          if(chunk2 != nullptr)
-          {
-            index = index | ((1 << 0) & ((!!chunk2->blocks[ z ][ 0 ][ x ].type) << 0));
-            index = index | ((1 << 1) & ((!!chunk2->blocks[ z ][ 0 ][x+1].type) << 1));
-            index = index | ((1 << 2) & ((!!chunk ->blocks[ z ][ y ][x+1].type) << 2));
-            index = index | ((1 << 3) & ((!!chunk ->blocks[ z ][ y ][ x ].type) << 3));
-            index = index | ((1 << 4) & ((!!chunk2->blocks[z+1][ 0 ][ x ].type) << 4));
-            index = index | ((1 << 5) & ((!!chunk2->blocks[z+1][ 0 ][x+1].type) << 5));
-            index = index | ((1 << 6) & ((!!chunk ->blocks[z+1][ y ][x+1].type) << 6));
-            index = index | ((1 << 7) & ((!!chunk ->blocks[z+1][ y ][ x ].type) << 7));
-          }
+          index = index | ((1 << 0) & ((!!chunk3->blocks[ z ][ 0 ][ x ].type) << 0));
+          index = index | ((1 << 1) & ((!!chunk3->blocks[ z ][ 0 ][x+1].type) << 1));
+          index = index | ((1 << 2) & ((!!chunk ->blocks[ z ][ y ][x+1].type) << 2));
+          index = index | ((1 << 3) & ((!!chunk ->blocks[ z ][ y ][ x ].type) << 3));
+          index = index | ((1 << 4) & ((!!chunk3->blocks[z+1][ 0 ][ x ].type) << 4));
+          index = index | ((1 << 5) & ((!!chunk3->blocks[z+1][ 0 ][x+1].type) << 5));
+          index = index | ((1 << 6) & ((!!chunk ->blocks[z+1][ y ][x+1].type) << 6));
+          index = index | ((1 << 7) & ((!!chunk ->blocks[z+1][ y ][ x ].type) << 7));
         } else
-        if(x == Chunk::WIDTH-1 && y == Chunk::WIDTH-1)
+        if(x == Chunk::WIDTH-1 && y == Chunk::WIDTH-1 &&
+           chunk2 != nullptr && chunk3 != nullptr && chunk4 != nullptr)
         {
-          Chunk* chunk2 = world->getChunk(glm::uvec2(chunkIndex.x+1,chunkIndex.y));
-          Chunk* chunk3 = world->getChunk(glm::uvec2(chunkIndex.x,chunkIndex.y+1));
-          Chunk* chunk4 = world->getChunk(glm::uvec2(chunkIndex.x+1,chunkIndex.y+1));
-          if(chunk2 != nullptr && chunk3 != nullptr && chunk4 != nullptr)
-          {
-            index = index | ((1 << 0) & ((!!chunk3->blocks[ z ][ 0 ][ x ].type) << 0));
-            index = index | ((1 << 1) & ((!!chunk4->blocks[ z ][ 0 ][ 0 ].type) << 1));
-            index = index | ((1 << 2) & ((!!chunk2->blocks[ z ][ y ][ 0 ].type) << 2));
-            index = index | ((1 << 3) & ((!!chunk ->blocks[ z ][ y ][ x ].type) << 3));
-            index = index | ((1 << 4) & ((!!chunk3->blocks[z+1][ 0 ][ x ].type) << 4));
-            index = index | ((1 << 5) & ((!!chunk4->blocks[z+1][ 0 ][ 0 ].type) << 5));
-            index = index | ((1 << 6) & ((!!chunk2->blocks[z+1][ y ][ 0 ].type) << 6));
-            index = index | ((1 << 7) & ((!!chunk ->blocks[z+1][ y ][ x ].type) << 7));
-          }
+          index = index | ((1 << 0) & ((!!chunk3->blocks[ z ][ 0 ][ x ].type) << 0));
+          index = index | ((1 << 1) & ((!!chunk4->blocks[ z ][ 0 ][ 0 ].type) << 1));
+          index = index | ((1 << 2) & ((!!chunk2->blocks[ z ][ y ][ 0 ].type) << 2));
+          index = index | ((1 << 3) & ((!!chunk ->blocks[ z ][ y ][ x ].type) << 3));
+          index = index | ((1 << 4) & ((!!chunk3->blocks[z+1][ 0 ][ x ].type) << 4));
+          index = index | ((1 << 5) & ((!!chunk4->blocks[z+1][ 0 ][ 0 ].type) << 5));
+          index = index | ((1 << 6) & ((!!chunk2->blocks[z+1][ y ][ 0 ].type) << 6));
+          index = index | ((1 << 7) & ((!!chunk ->blocks[z+1][ y ][ x ].type) << 7));
         }
 
         if((!index) || (index==255))
@@ -337,20 +327,25 @@ gl::Mesh* renderer::renderChunk(World* world, glm::uvec2 chunkIndex)
           if(vertex < 0 || vertex > 11)
             break;
 
-          vertexBuffer[vertexCount*vertexSize+0] = (Float32)x + pointsTable[vertex][0];
-          vertexBuffer[vertexCount*vertexSize+1] = (Float32)y + pointsTable[vertex][1];
-          vertexBuffer[vertexCount*vertexSize+2] = (Float32)z + pointsTable[vertex][2];
+          vertexBuffer[vertexCount*vertexSize+0] = chunkIndex.x*Chunk::WIDTH+
+                                                   (Float32)x +
+                                                   pointsTable[vertex][0];
+          vertexBuffer[vertexCount*vertexSize+1] = chunkIndex.y*Chunk::WIDTH+
+                                                   (Float32)y +
+                                                   pointsTable[vertex][1];
+          vertexBuffer[vertexCount*vertexSize+2] = (Float32)z +
+                                                   pointsTable[vertex][2];
 
           Float32 light =
-            (Float32)(
-            chunk->blocks[z+lightTable[vertex][2]]
-                         [y+lightTable[vertex][1]]
-                         [x+lightTable[vertex][0]].light+
-            chunk->blocks[z+lightTable[vertex][5]]
-                         [y+lightTable[vertex][4]]
-                         [x+lightTable[vertex][3]].light)/
-                          2.0/(Float32)Block::MAX_LIGHT;
-
+          ((Float32)(world->getBlockLight(
+            chunkIndex.x*Chunk::WIDTH+x+lightTable[vertex][0],
+            chunkIndex.y*Chunk::WIDTH+y+lightTable[vertex][1],
+            z+lightTable[vertex][2]))+
+           (Float32)(world->getBlockLight(
+            chunkIndex.x*Chunk::WIDTH+x+lightTable[vertex][3],
+            chunkIndex.y*Chunk::WIDTH+y+lightTable[vertex][4],
+            z+lightTable[vertex][5])))/
+          2.0/(Float32)Block::MAX_LIGHT;
 
           vertexBuffer[vertexCount*vertexSize+6] = light;
 

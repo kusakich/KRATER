@@ -78,7 +78,7 @@ void main()
 {
   float ka = 0.2;
   float kd = 0.8;
-  //float diff = max(dot(normalize(l), vNormal), 0.0);
+  float diff = max(dot(normalize(l), vNormal), 0.0);
   vec3  color = vec3(0.93, 0.76, 0.6);
-  fColor = vec4(color*(kd*vLight+ka)*vec3(simplex3d_fractal(vPosition*0.7)+0.5),1.0);
+  fColor = vec4(color*(kd*vLight*diff+ka)*vec3(simplex3d_fractal(vPosition*0.7)+0.5),1.0);
 }

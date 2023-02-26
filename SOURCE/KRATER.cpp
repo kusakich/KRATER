@@ -139,10 +139,6 @@ int main()
     for(UInt32 y = 0; y < World::WIDTH; ++y)
       for(UInt32 x = 0; x < World::WIDTH; ++x)
       {
-        chunkShaderProgram->uniform<glm::mat4>("m", glm::translate(glm::mat4(1),
-                                                    glm::vec3(x*Chunk::WIDTH,
-                                                              y*Chunk::WIDTH,
-                                                              0.0)));
         chunkMeshes[y][x]->draw();
       }
 
