@@ -87,7 +87,7 @@ namespace renderer
   };
   static std::map<char, Character> characters;
 
-  void initialize();
+  void initialize(std::string fontFile);
   void finalize();
   void drawQuad(Quad quad, Camera camera);
   void drawRect(Rect rect);
@@ -97,7 +97,7 @@ namespace renderer
 }
 
 
-void renderer::initialize()
+void renderer::initialize(std::string fontFile)
 {
   ///////////RECT///////////
   basicRectMesh = new gl::Mesh(basicRectVertex, 6, (UInt32[]){2,2,0}, GL_TRIANGLES);
@@ -132,11 +132,11 @@ void renderer::initialize()
     spdlog::critical("ERROR::FREETYPE: Could not init FreeType Library");
     return; }
   FT_Face face;
-  if (FT_New_Face(ft, "BASE/GUI/arial.ttf", 0, &face)) {
+  if (FT_New_Face(ft, fontFile.c_str(), 0, &face)) {
     spdlog::critical("ERROR::FREETYPE: Failed to load font");
     return; }
 
-  FT_Set_Pixel_Sizes(face, 0, 48);
+  FT_Set_Pixel_Sizes(face, 0, 16);
   glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
   for (UInt32 c = 0; c < 128; c++)

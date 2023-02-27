@@ -9,7 +9,7 @@
 
 namespace renderer
 {
-  void initialize();
+  void initialize(std::string fontFile);
   void finalize();
   void drawRect(Rect rect);
   void drawQuad(Quad quad, Camera camera);

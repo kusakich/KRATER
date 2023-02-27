@@ -21,13 +21,13 @@ int main()
   settingsFile.read(settings);
 
   Float64 deltaTime   = 1;
-  UInt32 windowWidth  = std::stoi(settings["Window"]["width"]);
-  UInt32 windowHeight = std::stoi(settings["Window"]["height"]);
-  const std::string windowTitle = settings["Window"]["title"];
+  UInt32 windowWidth  = std::stoi(settings["Graphics"]["width"]);
+  UInt32 windowHeight = std::stoi(settings["Graphics"]["height"]);
+  const std::string windowTitle = settings["Graphics"]["title"];
 
   core::window::create(windowTitle.c_str(), windowWidth, windowHeight);
   core::events::initialize();
-  renderer::initialize();
+  renderer::initialize(settings["Graphics"]["font"]);
 
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_CULL_FACE);
@@ -54,6 +54,7 @@ int main()
     }
 
   gl::Texture* selectTexture = new gl::Texture("BASE/GUI/select.png");
+  gl::Texture* dirtTexture = new gl::Texture("BASE/SPRITES/dirt.png");
 
   Camera mainCamera(glm::vec3(8.0,8.0,30.0), glm::vec3(0.0,0.0,0.0));
   mainCamera.setProjectionMatrix(glm::perspective(70.0,
@@ -136,6 +137,7 @@ int main()
     chunkShaderProgram->uniform<glm::mat4>("v", mainCamera.view);
     chunkShaderProgram->uniform<glm::mat4>("p", mainCamera.projection);
     chunkShaderProgram->uniform<glm::vec3>("l", glm::vec3(0.3,0.5,1.0));
+    dirtTexture->bind();
     for(UInt32 y = 0; y < World::WIDTH; ++y)
       for(UInt32 x = 0; x < World::WIDTH; ++x)
       {
@@ -195,25 +197,25 @@ int main()
     if(isShowF3)
     {
       UInt32  fps = (UInt32)(1.0/deltaTime);
-      renderer::drawText("FPS: " + std::to_string(fps),5,16,0.33);
-      renderer::drawText("KRATER alpha 1",5,32,0.33);
+      renderer::drawText("FPS: " + std::to_string(fps),5,16,1);
+      renderer::drawText("KRATER alpha 1",5,32,1);
       renderer::drawText(
         "pos  "
         + std::to_string(mainCamera.position.x).erase(std::to_string(mainCamera.position.x).size()-4) + " "
         + std::to_string(mainCamera.position.y).erase(std::to_string(mainCamera.position.y).size()-4) + " "
         + std::to_string(mainCamera.position.z).erase(std::to_string(mainCamera.position.z).size()-4),
-        5,48,0.33);
+        5,48,1);
       renderer::drawText(
         "rot  "
         + std::to_string(mainCamera.rotation.x).erase(std::to_string(mainCamera.rotation.x).size()-4) + " "
         + std::to_string(mainCamera.rotation.y).erase(std::to_string(mainCamera.rotation.y).size()-4) + " "
         + std::to_string(mainCamera.rotation.z).erase(std::to_string(mainCamera.rotation.z).size()-4),
-        5,64,0.33);
+        5,64,1);
       renderer::drawText("block "
         + std::to_string(iselect.x) + " "
         + std::to_string(iselect.y) + " "
         + std::to_string(iselect.z),
-        5,80,0.33);
+        5,80,1);
     }
 
     core::window::swapBuffers();

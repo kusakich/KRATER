@@ -6,6 +6,7 @@ in  float vLight;
 out vec4 fColor;
 
 uniform vec3 l;
+uniform sampler2D uTexture0;
 
 /* discontinuous pseudorandom uniformly distributed in [-0.5, +0.5]^3 */
 vec3 random3(vec3 c) {
@@ -76,9 +77,9 @@ float simplex3d_fractal(vec3 m) {
 
 void main()
 {
-  float ka = 0.2;
-  float kd = 0.8;
+  float ka = 0.4;
+  float kd = 0.6;
   float diff = max(dot(normalize(l), vNormal), 0.0);
-  vec3  color = vec3(0.93, 0.76, 0.6);
-  fColor = vec4(color*(kd*vLight*diff+ka)*vec3(simplex3d_fractal(vPosition*0.7)+0.5),1.0);
+  vec3  color = vec3(1.0);//vec3(0.93, 0.76, 0.6);
+  fColor = vec4(color*(kd*vLight*diff+ka),1.0)*texture(uTexture0, vPosition.xy/8.0);
 }
