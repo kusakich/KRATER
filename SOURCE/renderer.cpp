@@ -3,7 +3,7 @@
 #include FT_FREETYPE_H
 
 #include <util.hpp>
-#include <core.hpp>
+#include <window.hpp>
 #include <camera.hpp>
 #include <primitives.hpp>
 #include <world.hpp>
@@ -70,13 +70,15 @@ static const float basicQuadVertex[] =
 
 namespace renderer
 {
-  static gl::Mesh*          basicRectMesh;
-  static gl::ShaderProgram* basicRectShaderProgram;
+  static Window*            window                 = nullptr;
 
-  static gl::Mesh*          basicQuadMesh;
-  static gl::ShaderProgram* basicQuadShaderProgram;
+  static gl::Mesh*          basicRectMesh          = nullptr;
+  static gl::ShaderProgram* basicRectShaderProgram = nullptr;
 
-  static gl::ShaderProgram* basicTextShaderProgram;
+  static gl::Mesh*          basicQuadMesh          = nullptr;
+  static gl::ShaderProgram* basicQuadShaderProgram = nullptr;
+
+  static gl::ShaderProgram* basicTextShaderProgram = nullptr;
 
   struct Character
   {
@@ -87,18 +89,27 @@ namespace renderer
   };
   static std::map<char, Character> characters;
 
-  void initialize(std::string fontFile);
+  void initialize(Window* pwindow, std::string fontFile);
   void finalize();
   void drawQuad(Quad quad, Camera camera);
   void drawRect(Rect rect);
   void drawText(std::string text, Float32 x, Float32 y, Float32 scale);
 
   gl::Mesh* renderChunk(World* world, glm::uvec2 chunkIndex);
-}
+
+  glm::vec3 raycast(Camera* camera, Float32 delta);
+};
 
 
-void renderer::initialize(std::string fontFile)
+void renderer::initialize(Window* pwindow, std::string fontFile)
 {
+  window = pwindow;
+  if(!window)
+  {
+    spdlog::critical("Failed window initialize in renderer");
+    return;
+  }
+
   ///////////RECT///////////
   basicRectMesh = new gl::Mesh(basicRectVertex, 6, (UInt32[]){2,2,0}, GL_TRIANGLES);
   gl::Shader* basicRectShaders[2];
@@ -196,7 +207,7 @@ void renderer::drawRect(Rect rect)
     0.0,         0.0, 1.0, 0.0,
     rect.position.x,
     rect.position.y,  0.0, 1.0};
-  glm::mat4 rectView  = glm::ortho(0.0f, (Float32)core::window::getWidth(), (Float32)core::window::getHeight(), 0.0f);
+  glm::mat4 rectView  = glm::ortho(0.0f, (Float32)window->size.x, (Float32)window->size.y, 0.0f);
   basicRectShaderProgram->uniform<glm::mat4>("m", rectModel);
   basicRectShaderProgram->uniform<glm::mat4>("v", rectView);
   basicRectMesh->draw();
@@ -239,10 +250,11 @@ void renderer::drawText(std::string text, Float32 x, Float32 y, Float32 scale)
       0.0,         0.0, 1.0, 0.0,
       rect.position.x,
       rect.position.y,  0.0, 1.0};
-    glm::mat4 rectView  = glm::ortho(0.0f,
-                                    (Float32)core::window::getWidth(),
-                                    (Float32)core::window::getHeight(),
-                                     0.0f);
+    glm::mat4 rectView  = glm::ortho(
+                           0.0f,
+                          (Float32)window->size.x,
+                          (Float32)window->size.y,
+                           0.0f);
     basicTextShaderProgram->uniform<glm::mat4>("m", rectModel);
     basicTextShaderProgram->uniform<glm::mat4>("v", rectView);
     basicTextShaderProgram->uniform<glm::vec3>("color", glm::vec3(1.0));
@@ -386,4 +398,24 @@ gl::Mesh* renderer::renderChunk(World* world, glm::uvec2 chunkIndex)
 
   gl::Mesh* mesh = new gl::Mesh(vertexBuffer, vertexCount, (UInt32[]){3,3,1,0}, GL_TRIANGLES);
   return mesh;
+}
+
+glm::vec3 renderer::raycast(Camera* camera, Float32 delta)
+{
+  UInt32 width  = window->size.x;
+  UInt32 height = window->size.y;
+  Float32 z;
+  glm::vec3 result = glm::vec3(1.0);
+  glReadPixels(width/2, height/2, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &z);
+  result = glm::unProject(glm::vec3(width/2,height/2,z),
+                          camera->view, camera->projection,
+                          glm::vec4(0,0,width,height));
+
+  if(delta != 0.0)
+  {
+    glm::vec3 viewVector = result - camera->position;
+    viewVector = glm::normalize(viewVector);
+    result += viewVector*delta;
+  }
+  return result;
 }

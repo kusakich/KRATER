@@ -1,28 +1,13 @@
-#ifndef WINDOW_HPP_INCLUDED
-#define WINDOW_HPP_INCLUDED
+#ifndef EVENTS_HPP_INCLUDED
+#define EVENTS_HPP_INCLUDED
 
 #include <util.hpp>
+#include <window.hpp>
 
-namespace core
+namespace events
 {
-  namespace window
-  {
-    void create(const char* ptitle, UInt32 pwidth, UInt32 pheight);
-    void destroy();
-    void swapBuffers();
-    bool isClose();
-
-    UInt32 getWidth();
-    UInt32 getHeight();
-
-    Float64 getDeltaTime();
-  }
-
-  namespace events
-  {
-    void initialize();
-    void pollEvents();
-  }
+  void initialize(Window* window);
+  void pollEvents();
 
   namespace keyboard
   {
@@ -182,7 +167,7 @@ namespace core
     void setPosition(glm::vec2 position);
     bool isLocked();
     void lock(bool lock);
-  }
+  };
 };
 
 #endif

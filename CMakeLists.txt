@@ -15,7 +15,8 @@ PROJECT(${PROJECT_NAME} CXX)
 #SOURCE
 ADD_EXECUTABLE (${PROJECT_NAME}
                 SOURCE/KRATER.cpp
-                SOURCE/core.cpp
+                SOURCE/window.cpp
+                SOURCE/events.cpp
                 SOURCE/mesh.cpp
                 SOURCE/shader.cpp
                 SOURCE/world.cpp

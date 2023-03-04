@@ -1,9 +1,9 @@
 #version 330 core
 
-in  vec3 vPosition;
-in  vec3 vNormal;
+in  vec3  vPosition;
+in  vec3  vNormal;
 in  float vLight;
-out vec4 fColor;
+out vec4  fColor;
 
 uniform vec3 l;
 uniform sampler2D uTexture0;
@@ -80,6 +80,6 @@ void main()
   float ka = 0.4;
   float kd = 0.6;
   float diff = max(dot(normalize(l), vNormal), 0.0);
-  vec3  color = vec3(1.0);//vec3(0.93, 0.76, 0.6);
-  fColor = vec4(color*(kd*vLight*diff+ka),1.0)*texture(uTexture0, vPosition.xy/8.0);
+  vec3  color = vec3(0.93, 0.76, 0.6);
+  fColor = vec4(color*(kd*vLight*diff+ka)*((simplex3d(vPosition/0.5)>0.0 ? 0.9 : 1.0)),1.0);
 }

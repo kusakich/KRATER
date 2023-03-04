@@ -32,7 +32,9 @@ class World
 {
 public:
   static const UInt32 WIDTH = 4;
-
+private:
+  Chunk * chunks[World::WIDTH][World::WIDTH];
+public:
   World();
   ~World();
 
@@ -41,8 +43,6 @@ public:
   UInt32 getBlockLight(UInt32 x, UInt32 y, UInt32 z);
 
   Chunk * getChunk(glm::uvec2 index);
-private:
-  Chunk * chunks[World::WIDTH][World::WIDTH];
 };
 
 #endif

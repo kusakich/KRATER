@@ -2,7 +2,8 @@
 #include <mini/ini.h>
 
 #include <util.hpp>
-#include <core.hpp>
+#include <window.hpp>
+#include <events.hpp>
 #include <mesh.hpp>
 #include <shader.hpp>
 #include <texture.hpp>
@@ -13,21 +14,21 @@
 int main()
 {
   spdlog::info("Starting");
-  bool running = true;
+  bool running  = true;
   bool isShowF3 = false;
 
   mINI::INIFile settingsFile("BASE/settings.ini");
   mINI::INIStructure settings;
   settingsFile.read(settings);
 
-  Float64 deltaTime   = 1;
+  Float32 deltaTime   = 1.0;
   UInt32 windowWidth  = std::stoi(settings["Graphics"]["width"]);
   UInt32 windowHeight = std::stoi(settings["Graphics"]["height"]);
   const std::string windowTitle = settings["Graphics"]["title"];
 
-  core::window::create(windowTitle.c_str(), windowWidth, windowHeight);
-  core::events::initialize();
-  renderer::initialize(settings["Graphics"]["font"]);
+  Window* window = new Window(windowTitle, windowWidth, windowHeight);
+  events::initialize(window);
+  renderer::initialize(window, settings["Graphics"]["font"]);
 
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_CULL_FACE);
@@ -54,102 +55,98 @@ int main()
     }
 
   gl::Texture* selectTexture = new gl::Texture("BASE/GUI/select.png");
-  gl::Texture* dirtTexture = new gl::Texture("BASE/SPRITES/dirt.png");
 
-  Camera mainCamera(glm::vec3(8.0,8.0,30.0), glm::vec3(0.0,0.0,0.0));
-  mainCamera.setProjectionMatrix(glm::perspective(70.0,
-                                                  (Float64)core::window::getWidth()/
-                                                  (Float64)core::window::getHeight(),
-                                                  0.1,1000.0));
+  Camera* camera = new Camera(glm::vec3(8.0,8.0,30.0), glm::vec3(0.0,0.0,0.0));
+  camera->setProjectionMatrix(glm::perspective(70.0,
+                                               (Float64)window->size.x/
+                                               (Float64)window->size.y,
+                                               0.1,1000.0));
 
   while(running)
   {
-    if(core::window::isClose())
+    if(window->isClose())
       running = false;
 
-    if(core::keyboard::isJustPressed(core::keyboard::Keys::ESCAPE))
+    if(events::keyboard::isJustPressed(events::keyboard::Keys::ESCAPE))
       running = false;
 
-    if(core::keyboard::isJustPressed(core::keyboard::Keys::F3))
+    if(events::keyboard::isJustPressed(events::keyboard::Keys::F3))
       isShowF3 = !isShowF3;
 
-    if(core::keyboard::isJustPressed(core::keyboard::Keys::TAB))
+    if(events::keyboard::isJustPressed(events::keyboard::Keys::TAB))
     {
-      core::cursor::lock(!core::cursor::isLocked());
-      core::cursor::setPosition(glm::vec2(windowWidth/2, windowHeight/2));
+      events::cursor::lock(!events::cursor::isLocked());
+      events::cursor::setPosition(glm::vec2(window->size.x/2, window->size.y/2));
     }
 
-    core::events::pollEvents();
+    events::pollEvents();
 
-    deltaTime    = core::window::getDeltaTime();
-    windowWidth  = core::window::getWidth();
-    windowHeight = core::window::getHeight();
+    deltaTime = window->delta;
 
-    mainCamera.setProjectionMatrix( glm::perspective(
-                                      70.0,
-                                      (Float64)windowWidth/
-                                      (Float64)windowHeight,
-                                      0.1,1000.0));
+    camera->setProjectionMatrix(glm::perspective(
+                                70.0,
+                                (Float64)window->size.x/
+                                (Float64)window->size.y,
+                                0.1,1000.0));
 
-    if(core::keyboard::isPressed(core::keyboard::Keys::W))
-      mainCamera.translate(glm::vec3( 10.0*deltaTime*glm::sin(mainCamera.rotation.z),
-                                      10.0*deltaTime*glm::cos(mainCamera.rotation.z),
-                                      0.0));
-    if(core::keyboard::isPressed(core::keyboard::Keys::A))
-      mainCamera.translate(glm::vec3(-10.0*deltaTime*glm::cos(mainCamera.rotation.z),
-                                      10.0*deltaTime*glm::sin(mainCamera.rotation.z),
-                                      0.0));
-    if(core::keyboard::isPressed(core::keyboard::Keys::S))
-      mainCamera.translate(glm::vec3(-10.0*deltaTime*glm::sin(mainCamera.rotation.z),
-                                     -10.0*deltaTime*glm::cos(mainCamera.rotation.z),
-                                      0.0));
-    if(core::keyboard::isPressed(core::keyboard::Keys::D))
-      mainCamera.translate(glm::vec3( 10.0*deltaTime*glm::cos(mainCamera.rotation.z),
-                                     -10.0*deltaTime*glm::sin(mainCamera.rotation.z),
-                                      0.0));
+    if(events::keyboard::isPressed(events::keyboard::Keys::W))
+      camera->translate(glm::vec3(10.0*deltaTime*glm::sin(camera->rotation.z),
+                                  10.0*deltaTime*glm::cos(camera->rotation.z),
+                                  0.0));
+    if(events::keyboard::isPressed(events::keyboard::Keys::A))
+      camera->translate(glm::vec3(-10.0*deltaTime*glm::cos(camera->rotation.z),
+                                   10.0*deltaTime*glm::sin(camera->rotation.z),
+                                   0.0));
+    if(events::keyboard::isPressed(events::keyboard::Keys::S))
+      camera->translate(glm::vec3(-10.0*deltaTime*glm::sin(camera->rotation.z),
+                                  -10.0*deltaTime*glm::cos(camera->rotation.z),
+                                   0.0));
+    if(events::keyboard::isPressed(events::keyboard::Keys::D))
+      camera->translate(glm::vec3( 10.0*deltaTime*glm::cos(camera->rotation.z),
+                                  -10.0*deltaTime*glm::sin(camera->rotation.z),
+                                   0.0));
 
-    if(core::keyboard::isPressed(core::keyboard::Keys::SPACE))
-      mainCamera.translate(glm::vec3(0.0,0.0, 10.0*deltaTime));
-    if(core::keyboard::isPressed(core::keyboard::Keys::LSHIFT))
-      mainCamera.translate(glm::vec3(0.0,0.0,-10.0*deltaTime));
+    if(events::keyboard::isPressed(events::keyboard::Keys::SPACE))
+      camera->translate(glm::vec3(0.0,0.0, 10.0*deltaTime));
+    if(events::keyboard::isPressed(events::keyboard::Keys::LSHIFT))
+      camera->translate(glm::vec3(0.0,0.0,-10.0*deltaTime));
 
-    if(core::keyboard::isPressed(core::keyboard::Keys::UP))
-      mainCamera.rotateX( 3.0*deltaTime);
-    if(core::keyboard::isPressed(core::keyboard::Keys::DOWN))
-      mainCamera.rotateX(-3.0*deltaTime);
-    if(core::keyboard::isPressed(core::keyboard::Keys::RIGHT))
-      mainCamera.rotateZ( 5.0*deltaTime);
-    if(core::keyboard::isPressed(core::keyboard::Keys::LEFT))
-      mainCamera.rotateZ(-5.0*deltaTime);
+    if(events::keyboard::isPressed(events::keyboard::Keys::UP))
+      camera->rotateX( 3.0*deltaTime);
+    if(events::keyboard::isPressed(events::keyboard::Keys::DOWN))
+      camera->rotateX(-3.0*deltaTime);
+    if(events::keyboard::isPressed(events::keyboard::Keys::RIGHT))
+      camera->rotateZ( 5.0*deltaTime);
+    if(events::keyboard::isPressed(events::keyboard::Keys::LEFT))
+      camera->rotateZ(-5.0*deltaTime);
 
-    if(core::cursor::isLocked()) {
-      mainCamera.rotateX(-(Float64)core::cursor::getDeltaPosition().y*deltaTime*1.7);
-      mainCamera.rotateZ( (Float64)core::cursor::getDeltaPosition().x*deltaTime*1.7);
+    if(events::cursor::isLocked()) {
+      camera->rotateX(-(Float64)events::cursor::getDeltaPosition().y*deltaTime*1.7);
+      camera->rotateZ( (Float64)events::cursor::getDeltaPosition().x*deltaTime*1.7);
     }
 
-    mainCamera.update();
+    camera->update();
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glClearColor(0.0,0.0,0.0,1);
 
     chunkShaderProgram->bind();
     chunkShaderProgram->uniform<glm::mat4>("m", glm::mat4(1));
-    chunkShaderProgram->uniform<glm::mat4>("v", mainCamera.view);
-    chunkShaderProgram->uniform<glm::mat4>("p", mainCamera.projection);
+    chunkShaderProgram->uniform<glm::mat4>("v", camera->view);
+    chunkShaderProgram->uniform<glm::mat4>("p", camera->projection);
     chunkShaderProgram->uniform<glm::vec3>("l", glm::vec3(0.3,0.5,1.0));
-    dirtTexture->bind();
     for(UInt32 y = 0; y < World::WIDTH; ++y)
       for(UInt32 x = 0; x < World::WIDTH; ++x)
       {
         chunkMeshes[y][x]->draw();
       }
 
-    glm::vec3   select = mainCamera.raycast(0.2);
+    glm::vec3   select = renderer::raycast(camera, 0.2);
     glm::ivec3 iselect = glm::vec3((SInt32)round(select.x),
                                    (SInt32)round(select.y),
                                    (SInt32)round(select.z));
 
-    if(core::mouse::isClicked(core::mouse::Buttons::LEFT) && core::cursor::isLocked())
+    if(events::mouse::isClicked(events::mouse::Buttons::LEFT) && events::cursor::isLocked())
     {
       world->setBlockType(iselect.x,iselect.y,iselect.z, 0);
       Chunk * currentChunk = world->getChunk(glm::uvec2(iselect.x/Chunk::WIDTH,
@@ -163,9 +160,9 @@ int main()
       }
     }
 
-    if(core::mouse::isClicked(core::mouse::Buttons::RIGHT) && core::cursor::isLocked())
+    if(events::mouse::isClicked(events::mouse::Buttons::RIGHT) && events::cursor::isLocked())
     {
-      select = mainCamera.raycast(-0.4);
+      select  = renderer::raycast(camera, -0.4);
       iselect = glm::vec3((SInt32)round(select.x),
                           (SInt32)round(select.y),
                           (SInt32)round(select.z));
@@ -183,15 +180,15 @@ int main()
     }
 
     selectTexture->bind();
-    if(core::cursor::isLocked())
+    if(events::cursor::isLocked())
     {
-      renderer::drawRect(Rect(windowWidth/2-8,
-                                  windowHeight/2-8,
-                                  16, 16));
+      renderer::drawRect(Rect(window->size.x/2-8,
+                              window->size.y/2-8,
+                              16, 16));
     } else {
-      renderer::drawRect(Rect(core::cursor::getPosition().x,
-                                  core::cursor::getPosition().y,
-                                  16, 16));
+      renderer::drawRect(Rect(events::cursor::getPosition().x,
+                              events::cursor::getPosition().y,
+                              16, 16));
     }
 
     if(isShowF3)
@@ -201,15 +198,15 @@ int main()
       renderer::drawText("KRATER alpha 1",5,32,1);
       renderer::drawText(
         "pos  "
-        + std::to_string(mainCamera.position.x).erase(std::to_string(mainCamera.position.x).size()-4) + " "
-        + std::to_string(mainCamera.position.y).erase(std::to_string(mainCamera.position.y).size()-4) + " "
-        + std::to_string(mainCamera.position.z).erase(std::to_string(mainCamera.position.z).size()-4),
+        + std::to_string(camera->position.x).erase(std::to_string(camera->position.x).size()-4) + " "
+        + std::to_string(camera->position.y).erase(std::to_string(camera->position.y).size()-4) + " "
+        + std::to_string(camera->position.z).erase(std::to_string(camera->position.z).size()-4),
         5,48,1);
       renderer::drawText(
         "rot  "
-        + std::to_string(mainCamera.rotation.x).erase(std::to_string(mainCamera.rotation.x).size()-4) + " "
-        + std::to_string(mainCamera.rotation.y).erase(std::to_string(mainCamera.rotation.y).size()-4) + " "
-        + std::to_string(mainCamera.rotation.z).erase(std::to_string(mainCamera.rotation.z).size()-4),
+        + std::to_string(camera->rotation.x).erase(std::to_string(camera->rotation.x).size()-4) + " "
+        + std::to_string(camera->rotation.y).erase(std::to_string(camera->rotation.y).size()-4) + " "
+        + std::to_string(camera->rotation.z).erase(std::to_string(camera->rotation.z).size()-4),
         5,64,1);
       renderer::drawText("block "
         + std::to_string(iselect.x) + " "
@@ -218,9 +215,9 @@ int main()
         5,80,1);
     }
 
-    core::window::swapBuffers();
+    window->swapBuffers();
   }
 
   renderer::finalize();
-  core::window::destroy();
+  delete window;
 }

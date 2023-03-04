@@ -9,13 +9,15 @@
 
 namespace renderer
 {
-  void initialize(std::string fontFile);
+  void initialize(Window* pwindow, std::string fontFile);
   void finalize();
   void drawRect(Rect rect);
-  void drawQuad(Quad quad, Camera camera);
+  void drawQuad(Quad quad, Camera* camera);
   void drawText(std::string text, Float32 x, Float32 y, Float32 scale);
 
   gl::Mesh* renderChunk(World* world, glm::uvec2 chunkIndex);
+
+  glm::vec3 raycast(Camera* camera, Float32 delta);
 };
 
 #endif

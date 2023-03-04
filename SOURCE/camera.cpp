@@ -1,15 +1,11 @@
 #include <util.hpp>
-#include <core.hpp>
 #include <camera.hpp>
-
-#include <glad/glad.h>
 
 Camera::Camera(glm::vec3 pposition, glm::vec3 protation) :
 position_(pposition),
 rotation_(protation),
 position(position_),
 rotation(rotation_),
-viewVector(viewVector_),
 view(view_),
 projection(projection_)
 {
@@ -65,24 +61,4 @@ void Camera::rotateZ(Float32 angle)
 void Camera::setProjectionMatrix(glm::mat4 matrix)
 {
   projection_ = matrix;
-}
-
-glm::vec3 Camera::raycast(Float32 delta)
-{
-  UInt32 width = core::window::getWidth();
-  UInt32 height = core::window::getHeight();
-  Float32 z;
-  glm::vec3 result = glm::vec3(1.0);
-  glReadPixels(width/2, height/2, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &z);
-  result = glm::unProject(glm::vec3(width/2,height/2,z),
-                          view_, projection_,
-                          glm::vec4(0,0,width,height));
-
-  if(delta != 0.0)
-  {
-    viewVector_ = result - position_;
-    viewVector_ = glm::normalize(viewVector_);
-    result += viewVector_*delta;
-  }
-  return result;
 }
