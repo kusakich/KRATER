@@ -7,11 +7,11 @@
 Window::Window(std::string ptitle, UInt32 pwidth, UInt32 pheight) :
 title_(ptitle),
 size_(pwidth, pheight),
-delta_(1.0),
+deltaTime_(1.0),
 handle(handle_),
 title(title_),
 size(size_),
-delta(delta_)
+deltaTime(deltaTime_)
 {
   spdlog::info("Creating window...");
   if(!glfwInit()) {
@@ -55,7 +55,7 @@ void Window::swapBuffers()
 {
   static Float64 lastTime;
   Float64 currentTime = glfwGetTime();
-  delta_ = currentTime - lastTime;
+  deltaTime_ = currentTime - lastTime;
   lastTime = currentTime;
   glfwSwapBuffers(handle_);
 }

@@ -137,6 +137,10 @@ namespace cursor
   void setPosition(glm::vec2 position)
   {
     glfwSetCursorPos(window->handle, position.x, position.y);
+    cursorX = position.x;
+    cursorY = position.y;
+    cursorDeltaX = 0.0;
+    cursorDeltaY = 0.0;
   }
 
   bool isLocked()

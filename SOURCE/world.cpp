@@ -15,13 +15,13 @@ Chunk::Chunk(glm::uvec2 pindex) : index(pindex)
     {
       Float64 h =
         glm::perlin(glm::vec3(
-                    (Float64)(x+index.x*WIDTH)*0.1,
-                    (Float64)(y+index.y*WIDTH)*0.1,
+                    (Float64)(x+index.x*WIDTH)*0.05,
+                    (Float64)(y+index.y*WIDTH)*0.05,
                     0.0));
 
       for(UInt32 z = 0; z < Chunk::WIDTH; z++)
       {
-        if(z < (h+0.5)*7+2)
+        if(z < (h+0.5)*7+5)
           blocks[z][y][x].type = 1;
       }
     }
@@ -31,8 +31,10 @@ void Chunk::setBlockType(UInt32 x, UInt32 y, UInt32 z, UInt32 type)
 {
   if( x >= 0 && x < Chunk::WIDTH &&
       y >= 0 && y < Chunk::WIDTH &&
-      z >= 0 && z < Chunk::WIDTH )
+      z >= 0 && z < Chunk::WIDTH ) {
     blocks[z][y][x].type = type;
+    edited = true;
+  }
 }
 
 UInt32 Chunk::getBlockType (UInt32 x, UInt32 y, UInt32 z)
@@ -106,6 +108,16 @@ void World::setBlockType(UInt32 x, UInt32 y, UInt32 z, UInt32 type)
                      y%Chunk::WIDTH,
                      z%Chunk::WIDTH,
                      type);
+
+      if(x%Chunk::WIDTH == 0 && x != 0 && chunks[y/Chunk::WIDTH][x/Chunk::WIDTH-1] != nullptr)
+        chunks[y/Chunk::WIDTH][x/Chunk::WIDTH-1]->edited = true;
+      if(x%Chunk::WIDTH == Chunk::WIDTH-1 && x != World::WIDTH-1 && chunks[y/Chunk::WIDTH][x/Chunk::WIDTH+1] != nullptr)
+        chunks[y/Chunk::WIDTH][x/Chunk::WIDTH+1]->edited = true;
+      if(y%Chunk::WIDTH == 0 && y != 0 && chunks[y/Chunk::WIDTH-1][x/Chunk::WIDTH] != nullptr)
+        chunks[y/Chunk::WIDTH-1][x/Chunk::WIDTH]->edited = true;
+      if(y%Chunk::WIDTH == Chunk::WIDTH-1 && y != World::WIDTH-1 && chunks[y/Chunk::WIDTH+1][x/Chunk::WIDTH] != nullptr)
+        chunks[y/Chunk::WIDTH+1][x/Chunk::WIDTH]->edited = true;
+      edited = true;
     }
   }
 }
@@ -145,8 +157,9 @@ UInt32 World::getBlockLight(UInt32 x, UInt32 y, UInt32 z)
 
 Chunk * World::getChunk(glm::uvec2 index)
 {
-  if(index.x >= 0 && index.x < World::WIDTH &&
-     index.y >= 0 && index.y < World::WIDTH) return chunks[index.y][index.x];
+  if( index.x >= 0 && index.x < World::WIDTH &&
+      index.y >= 0 && index.y < World::WIDTH )
+    return chunks[index.y][index.x];
 
   return nullptr;
 }

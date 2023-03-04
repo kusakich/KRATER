@@ -11,12 +11,12 @@ private:
   GLFWwindow* handle_;
   std::string title_;
   glm::uvec2  size_;
-  Float64     delta_;
+  Float64     deltaTime_;
 public:
   GLFWwindow* const & handle;
   std::string const & title;
   glm::uvec2  const & size;
-  Float64     const & delta;
+  Float64     const & deltaTime;
   Window( const std::string ptitle  = "Default",
           const UInt32      pwidth  = 800,
           const UInt32      pheight = 600);

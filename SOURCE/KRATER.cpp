@@ -81,7 +81,7 @@ int main()
 
     events::pollEvents();
 
-    deltaTime = window->delta;
+    deltaTime = window->deltaTime;
 
     camera->setProjectionMatrix(glm::perspective(
                                 70.0,
@@ -149,15 +149,6 @@ int main()
     if(events::mouse::isClicked(events::mouse::Buttons::LEFT) && events::cursor::isLocked())
     {
       world->setBlockType(iselect.x,iselect.y,iselect.z, 0);
-      Chunk * currentChunk = world->getChunk(glm::uvec2(iselect.x/Chunk::WIDTH,
-                                                        iselect.y/Chunk::WIDTH));
-      if(currentChunk != nullptr)
-      {
-        currentChunk->computeLight();
-        delete chunkMeshes[iselect.y/Chunk::WIDTH][iselect.x/Chunk::WIDTH];
-        chunkMeshes[iselect.y/Chunk::WIDTH][iselect.x/Chunk::WIDTH] =
-        renderer::renderChunk(world, currentChunk->index);
-      }
     }
 
     if(events::mouse::isClicked(events::mouse::Buttons::RIGHT) && events::cursor::isLocked())
@@ -168,15 +159,23 @@ int main()
                           (SInt32)round(select.z));
 
       world->setBlockType(iselect.x,iselect.y,iselect.z,1);
-      Chunk * currentChunk = world->getChunk(glm::uvec2(iselect.x/Chunk::WIDTH,
-                                                        iselect.y/Chunk::WIDTH));
-      if(currentChunk != nullptr)
+    }
+
+    if(world->edited)
+    {
+      for(UInt32 y = 0; y < World::WIDTH; ++y)
+      for(UInt32 x = 0; x < World::WIDTH; ++x)
       {
-        currentChunk->computeLight();
-        delete chunkMeshes[iselect.y/Chunk::WIDTH][iselect.x/Chunk::WIDTH];
-        chunkMeshes[iselect.y/Chunk::WIDTH][iselect.x/Chunk::WIDTH] =
-        renderer::renderChunk(world, currentChunk->index);
+        Chunk * currentChunk = world->getChunk(glm::uvec2(x,y));
+        if(currentChunk != nullptr && currentChunk->edited)
+        {
+          currentChunk->computeLight();
+          delete chunkMeshes[y][x];
+          chunkMeshes[y][x] = renderer::renderChunk(world, currentChunk->index);
+          currentChunk->edited = false;
+        }
       }
+      world->edited = false;
     }
 
     selectTexture->bind();
@@ -196,14 +195,12 @@ int main()
       UInt32  fps = (UInt32)(1.0/deltaTime);
       renderer::drawText("FPS: " + std::to_string(fps),5,16,1);
       renderer::drawText("KRATER alpha 1",5,32,1);
-      renderer::drawText(
-        "pos  "
+      renderer::drawText("XYZ  "
         + std::to_string(camera->position.x).erase(std::to_string(camera->position.x).size()-4) + " "
         + std::to_string(camera->position.y).erase(std::to_string(camera->position.y).size()-4) + " "
         + std::to_string(camera->position.z).erase(std::to_string(camera->position.z).size()-4),
         5,48,1);
-      renderer::drawText(
-        "rot  "
+      renderer::drawText("rotation  "
         + std::to_string(camera->rotation.x).erase(std::to_string(camera->rotation.x).size()-4) + " "
         + std::to_string(camera->rotation.y).erase(std::to_string(camera->rotation.y).size()-4) + " "
         + std::to_string(camera->rotation.z).erase(std::to_string(camera->rotation.z).size()-4),

@@ -22,16 +22,17 @@ public:
   void   setBlockType (UInt32 x, UInt32 y, UInt32 z, UInt32 type);
   UInt32 getBlockType (UInt32 x, UInt32 y, UInt32 z);
   UInt32 getBlockLight(UInt32 x, UInt32 y, UInt32 z);
-  void   computeLight();
+  void   computeLight ();
 
   glm::uvec2 index;
+  bool edited = false;
   Block blocks[WIDTH][WIDTH][WIDTH];
 };
 
 class World
 {
 public:
-  static const UInt32 WIDTH = 4;
+  static const UInt32 WIDTH = 8;
 private:
   Chunk * chunks[World::WIDTH][World::WIDTH];
 public:
@@ -43,6 +44,8 @@ public:
   UInt32 getBlockLight(UInt32 x, UInt32 y, UInt32 z);
 
   Chunk * getChunk(glm::uvec2 index);
+
+  bool edited = false;
 };
 
 #endif
